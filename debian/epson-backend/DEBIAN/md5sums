@@ -1,0 +1,11 @@
+8c9a34e5f091be3793f1825f54eb9a1c  usr/lib/cups/backend/ecblp
+5d32e170021ac5119591eef964feb998  usr/lib/epson-backend/rc.d/inst-rc_d.sh
+63b4d171afec96ebd9ab6da740ef1868  usr/lib/epson-backend/rc.d/ecbd
+6d9ed3c6f906b27e05ab50435369a810  usr/lib/epson-backend/rc.d/init-functions
+e2f53521a3d000835f0242c498d91613  usr/lib/epson-backend/ecbd
+f819f5d8c57afeef937a33d49d8e932c  usr/lib/epson-backend/scripts/inst-cups-post.sh
+d2d46deea7b19a71f336989a6c8c9842  usr/share/doc/epson-backend/copyright
+15092883f7095134c49ccf739623fba7  usr/share/doc/epson-backend/AUTHORS
+2253259a2336aadbbea2c2650e423cc2  usr/share/doc/epson-backend/COPYING.gz
+a6a4096113a756df0ab064d79d50ab11  usr/share/doc/epson-backend/README
+b4f1d35b8cabc895f66fe9d161d7573e  usr/share/doc/epson-backend/NEWS.gz

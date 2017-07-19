@@ -1,0 +1,134 @@
+#! /bin/sh
+# Copyright (C) Seiko Epson Corporation 2014.
+#  This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+# For non-LSB compliant distributions; needs to come before INIT INFO
+# block.
+#
+# chkconfig: 2345 11 89
+# description: EPSON Custom Backend Daemon
+
+### BEGIN INIT INFO
+# Provides:          ecbd
+# Required-Start:    $local_fs $remote_fs
+# Required-Stop:     $local_fs $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: EPSON Custom Backend Daemon
+# Description:       EPSON Custom Backend Daemon
+### END INIT INFO
+
+pkglibdir=/usr/lib/epson-backend
+pkgrcddir=/usr/lib/epson-backend/rc.d
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+SERVICE_NAME=ecbd
+DAEMON_DIR=${pkglibdir}
+DAEMON=${DAEMON_DIR}/${SERVICE_NAME}
+INIT_PROG=/etc/init.d/$SERVICE_NAME
+
+PID_FILE="-p /var/run/${SERVICE_NAME}.pid"
+
+
+test -x $DAEMON || exit 0
+
+
+# if   test -r /lib/lsb/init-functions; then
+#     . /lib/lsb/init-functions
+# elif test -r ${pkgrcddir}/init-functions; then
+#     . ${pkgrcddir}/init-functions
+# else
+#     cat <<EOF
+# $INIT_PROG: internal error
+# EOF
+#     exit 1
+# fi
+
+if test -r ${pkgrcddir}/init-functions; then
+    . ${pkgrcddir}/init-functions
+else
+    cat <<EOF
+$INIT_PROG: internal error
+EOF
+    exit 1
+fi
+
+
+usage () {
+    ACTIONS="start|stop|restart|try-restart|force-reload|status"
+
+    log_failure_msg "Usage: $INIT_PROG {$ACTIONS}" >&2
+}
+
+
+case "$1" in
+
+    start)
+	echo -n "Starting ${SERVICE_NAME}:"
+	start_daemon $PID_FILE $DAEMON
+	echo "."
+	;;
+
+    stop)
+	echo -n "Stopping ${SERVICE_NAME}:"
+	killproc $PID_FILE $DAEMON
+	echo "."
+	;;
+
+    restart)
+	pidofproc $PID_FILE $DAEMON >/dev/null 2>&1 \
+	    && $0 stop
+	sleep 2
+	$0 start
+	;;
+
+    try-restart)
+	pidofproc $PID_FILE $DAEMON >/dev/null 2>&1 \
+	    && $0 restart
+	;;
+
+    reload)
+	usage
+	exit 3			# LSB == not implemented
+	;;
+
+    force-reload)
+	$0 reload >/dev/null 2>&1 || $0 try-restart
+	;;
+
+    status)
+	pidofproc $PID_FILE $DAEMON >/dev/null 2>&1
+	case "$?" in
+	    0)	echo "${SERVICE_NAME} is active."
+		;;
+	    1)	echo "${SERVICE_NAME} is not active, but a process ID file exists."
+		;;
+	    2)	echo "${SERVICE_NAME} is not active, but a lock file exists."
+		;;
+	    3)	echo "${SERVICE_NAME} is not active."
+		;;
+	    *)	echo "${SERVICE_NAME} status is not known."
+		;;
+	esac
+	;;
+
+    *)
+	usage
+	exit 2			# LSB == invalid argument
+	;;
+
+esac
+
+exit $?
