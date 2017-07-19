@@ -120,10 +120,13 @@
 /* #undef LTDL_DLOPEN_DEPLIBS */
 
 /* Define to the system default library search path. */
-#define LT_DLSEARCH_PATH "/lib:/usr/lib:/usr/lib/mesa:/lib/i486-linux-gnu:/usr/lib/i486-linux-gnu:/usr/lib/alsa-lib:/usr/local/lib"
+#define LT_DLSEARCH_PATH "/lib:/usr/lib:/usr/lib/x86_64-linux-gnu/libfakeroot:/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:/lib/i686-linux-gnu:/usr/lib/i686-linux-gnu:/usr/local/lib:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu:/usr/lib/nvidia-375:/usr/lib32/nvidia-375:/usr/lib/nvidia-375:/usr/lib32/nvidia-375:/lib32:/usr/lib32"
 
 /* The archive extension */
 #define LT_LIBEXT "a"
+
+/* The archive prefix */
+#define LT_LIBPREFIX "lib"
 
 /* Define to the extension used for runtime loadable modules, say, ".so". */
 #define LT_MODULE_EXT ".so"
@@ -132,9 +135,14 @@
    module search path. */
 #define LT_MODULE_PATH_VAR "LD_LIBRARY_PATH"
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #define LT_OBJDIR ".libs/"
+
+/* Define to the shared library suffix, say, ".dylib". */
+/* #undef LT_SHARED_EXT */
+
+/* Define to the shared archive member specification, say "(shr.o)". */
+/* #undef LT_SHARED_LIB_MEMBER */
 
 /* Define if dlsym() requires a leading underscore in symbol names. */
 /* #undef NEED_USCORE */
@@ -149,7 +157,7 @@
 #define PACKAGE_NAME "libltdl"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "libltdl 2.2.6b"
+#define PACKAGE_STRING "libltdl 2.4.3a"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libltdl"
@@ -158,16 +166,16 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.2.6b"
+#define PACKAGE_VERSION "2.4.3a"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "2.2.6b"
+#define VERSION "2.4.3a"
 
 /* Define so that glibc/gnulib argp.h does not typedef error_t. */
 /* #undef __error_t_defined */
 
-/* Define to a type to use for `error_t' if it is not otherwise available. */
+/* Define to a type to use for 'error_t' if it is not otherwise available. */
 /* #undef error_t */
