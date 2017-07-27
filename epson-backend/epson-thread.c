@@ -27,14 +27,17 @@
 #  include <config.h>
 #endif
 
-//#include <sys/time.h>
-//#include <pthread.h>
-
-#include <pthread.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <winsock2.h>
+#include <pthread.h>
 #include <sys/types.h>
 
 #include "epson-def.h"
+#include "epson-typedefs.h"
+#include "epson-thread.h"
+#include "epson-daemon.h"
 
 //#pragma comment(lib,"pthreadVSE2.lib")
 

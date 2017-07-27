@@ -28,7 +28,6 @@
 #endif
 
 #include <signal.h>
-#include <fcntl.h>
 #include "epson-daemon.h"
 #include "epson-thread.h"
 

@@ -27,10 +27,10 @@
     <ClCompile Include="epson-thread.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="epson-setup.c">
+    <ClCompile Include="epson-signal.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="epson-signal.c">
+    <ClCompile Include="epson-wrapper.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -42,6 +42,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="epson-typedefs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="epson-daemon.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="epson-wrapper.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

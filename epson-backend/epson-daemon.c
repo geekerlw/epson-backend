@@ -53,18 +53,15 @@
 #include <config.h>
 #endif
 
-#include <sys/types.h>
-#include <sys/stat.h>
-//#include <sys/file.h>
-#include <fcntl.h>
-//#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "epson-daemon.h"
-#include "libepson.h"
-#include "epson-thread.h"
+#include <assert.h>
+
+#include "epson-def.h"
 #include "epson-typedefs.h"
+#include "epson-daemon.h"
+#include "epson-thread.h"
+#include "epson-wrapper.h"
 
 
 #define ECBD_VERSION "* ecbd is a part of " PACKAGE_STRING
@@ -73,7 +70,7 @@
     -p pidfile\n\
         Use specified file as pid file"
 
-int pid_fd = -1;
+//int pid_fd = -1;
 
 /* connect a printer */
 /*
@@ -84,39 +81,7 @@ int pid_fd = -1;
  */
 static int prt_connect(P_CBTD_INFO p_info)
 {
-	int *fd = &p_info->devfd;
-	int i;
-	int error = 1;
-
-	if (is_sysflags(p_info, ST_SYS_DOWN))
-		return -1;
-
-	for (i = 0; i < 5; i++)
-	{
-		error = parameter_update(p_info);
-
-		if (error == 0) {
-			*fd = open(p_info->devprt_path, O_RDWR);
-		}
-		else {
-			*fd = (-1);
-		}
-
-		if (*fd < 0)
-		{
-			usleep(50000);
-		}
-		else
-		{
-			_DEBUG_MESSAGE("connect printer\n");
-			return *fd;
-		}
-	}
-
-	//_DEBUG_FUNC(perror(devprt_path));
-	_DEBUG_MESSAGE("waiting.....\n");
-	sleep(3);
-	return *fd;
+	return 0;
 }
 
 /* initialize CBT */

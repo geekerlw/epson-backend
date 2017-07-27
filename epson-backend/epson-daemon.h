@@ -34,9 +34,6 @@
 #define NOEBUG
 #endif
 
-#include <assert.h>
-#include "epson-def.h"
-
 #define CBTD_THREAD_STACK_SIZE 0x4000 /* unused */
 
 #define PRT_STATUS_MAX 256	/* maximum size of printer status strings */

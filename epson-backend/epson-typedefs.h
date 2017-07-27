@@ -20,14 +20,7 @@
 #ifndef EPSON_TYPEDEFS_H_
 #define EPSON_TYPEDEFS_H_
 
-#define DAEMON_PORT        35587
-#define DEVICE_PATH        "/dev/usb/lp0"
-#define FIFO_PATH	      "/var/run/ecblp0"
-
-#define EPS_MNT_NOZZLE     0
-#define EPS_MNT_CLEANING   1
-
-#define EPS_INK_NUM		   20
+typedef void* HANDLE;
 
 /*------------------------------- Define Basic Data Types ------------------------------*/
 /*******************************************|********************************************/

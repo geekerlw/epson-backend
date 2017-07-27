@@ -17,13 +17,13 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-//#include <unistd.h>
-#include <Windows.h>
+
 #include <stdio.h>
-#include "epson-hw.h"
+#include <stdlib.h>
+
+#include "epson-def.h"
+#include "epson-typedefs.h"
+//#include "epson-hw.h"
 #include "epson-thread.h"
 #include "epson-wrapper.h"
 
@@ -32,32 +32,33 @@
 occurred. */
 #define ECBT_ACCSESS_WAIT_MAX 20
 
-
 /* Initialize ECBT */
 int start_ecbt_engine(void)
 {
-	return DllMain(NULL, DLL_PROCESS_ATTACH, NULL);
+	//return DllMain(NULL, DLL_PROCESS_ATTACH, NULL);
+	return 0;
 }
 
 
 /* Finish ECBT */
 int end_ecbt_engine(void)
 {
-	return DllMain(NULL, DLL_PROCESS_DETACH, NULL);
+	//return DllMain(NULL, DLL_PROCESS_DETACH, NULL);
+	return 0;
 }
 
 
 /* Open CBT and open CTRL channel at the same time */
 int open_port_driver(P_CBTD_INFO p_info)
 {
-	int err;
+	int err = 0;
 
 	enter_critical(p_info->ecbt_accsess_critical);
-
+/*
 	err = (int)ECBT_Open(&p_info->devfd, &p_info->ecbt_handle);
 	if (err == 0)
 		err = (int)ECBT_OpenChannel(p_info->ecbt_handle, SID_CTRL);
-
+*/
 	leave_critical(p_info->ecbt_accsess_critical);
 
 	if (err)
@@ -71,17 +72,17 @@ int open_port_driver(P_CBTD_INFO p_info)
 int
 close_port_driver(P_CBTD_INFO p_info)
 {
-	int err;
+	int err = 0;
 
 	if (p_info->ecbt_handle == NULL)
 		return 0;
 
 	enter_critical(p_info->ecbt_accsess_critical);
-
+/*
 	ECBT_CloseChannel(p_info->ecbt_handle, SID_CTRL);
 	ECBT_CloseChannel(p_info->ecbt_handle, SID_DATA);
 	err = ECBT_Close(p_info->ecbt_handle);
-
+*/
 	leave_critical(p_info->ecbt_accsess_critical);
 
 	if (err)
@@ -95,6 +96,7 @@ close_port_driver(P_CBTD_INFO p_info)
 int
 open_port_channel(P_CBTD_INFO p_info, char sid)
 {
+/*
 	int err;
 
 	enter_critical(p_info->ecbt_accsess_critical);
@@ -104,6 +106,8 @@ open_port_channel(P_CBTD_INFO p_info, char sid)
 	if (err)
 		return 1;
 	return 0;
+*/
+	return 0;
 }
 
 
@@ -111,12 +115,15 @@ open_port_channel(P_CBTD_INFO p_info, char sid)
 int
 close_port_channel(P_CBTD_INFO p_info, char sid)
 {
+/*	
 	if (p_info->ecbt_handle)
 	{
 		enter_critical(p_info->ecbt_accsess_critical);
 		ECBT_CloseChannel(p_info->ecbt_handle, sid);
 		leave_critical(p_info->ecbt_accsess_critical);
 	}
+	return 0;
+*/
 	return 0;
 }
 
@@ -125,6 +132,7 @@ int
 write_to_prt(P_CBTD_INFO p_info, char sid,
 	char* buffer, int* p_size)
 {
+/*
 	int count = 0;
 	int err = CBT_ERR_NORMAL;
 
@@ -146,9 +154,9 @@ write_to_prt(P_CBTD_INFO p_info, char sid,
 		}
 
 	}
-
+*/
 	/* when channel was closed */
-	if (err == CBT_ERR_CHNOTOPEN)
+/*	if (err == CBT_ERR_CHNOTOPEN)
 		ECBT_OpenChannel(p_info->ecbt_handle, sid);
 
 	_DEBUG_MESSAGE_VAL("ECBT_Write size =", *p_size);
@@ -160,6 +168,8 @@ write_to_prt(P_CBTD_INFO p_info, char sid,
 
 	_DEBUG_MESSAGE("Out Write");
 	return 0;
+*/
+	return 0;
 }
 
 
@@ -168,7 +178,7 @@ int
 read_from_prt(P_CBTD_INFO p_info, char sid,
 	char* buffer, int* p_size)
 {
-	int count = 0;
+/*	int count = 0;
 	int err = CBT_ERR_NORMAL;
 
 	_DEBUG_MESSAGE("In Read");
@@ -187,9 +197,9 @@ read_from_prt(P_CBTD_INFO p_info, char sid,
 			break;
 		}
 	}
-
+*/
 	/* when channel was closed */
-	if (err == CBT_ERR_CHNOTOPEN)
+/*	if (err == CBT_ERR_CHNOTOPEN)
 		ECBT_OpenChannel(p_info->ecbt_handle, sid);
 
 	_DEBUG_MESSAGE_VAL("ECBT_Read size =", *p_size);
@@ -200,5 +210,7 @@ read_from_prt(P_CBTD_INFO p_info, char sid,
 	}
 
 	_DEBUG_MESSAGE("Out Read");
+	return 0;
+*/
 	return 0;
 }

@@ -30,7 +30,10 @@
 #ifndef __EPSON_THREAD_H__
 #define __EPSON_THREAD_H__
 
+#include <WinSock2.h>
 #include "epson-def.h"
+#include "epson-typedefs.h"
+#include "epson-daemon.h"
 
 /* information to do cleanup of a system */
 typedef struct _CLEANUP_ARGS

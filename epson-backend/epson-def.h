@@ -33,8 +33,14 @@
 /* printer access wait time */
 #define PRINTER_ACCESS_WAIT 120000
 
+#define DAEMON_PORT        35587
+#define DEVICE_PATH        "/dev/usb/lp0"
+#define FIFO_PATH	      "/var/run/ecblp0"
 
-typedef void* HANDLE;
+#define EPS_MNT_NOZZLE     0
+#define EPS_MNT_CLEANING   1
+
+#define EPS_INK_NUM		   20
 
 /* Debug massage */
 
