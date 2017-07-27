@@ -137,7 +137,7 @@ write_to_prt(P_CBTD_INFO p_info, char sid,
 			|| err == CBT_ERR_WRITETIMEOUT
 			|| err == CBT_ERR_WRITEERROR) && *p_size == 0)
 		{
-			usleep(10000);
+			Sleep(10);
 		}
 
 		else

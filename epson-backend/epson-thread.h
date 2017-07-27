@@ -31,7 +31,6 @@
 #define __EPSON_THREAD_H__
 
 #include "epson-def.h"
-#include "epson-daemon.h"
 
 /* information to do cleanup of a system */
 typedef struct _CLEANUP_ARGS
@@ -40,11 +39,6 @@ typedef struct _CLEANUP_ARGS
 	int* p_max;			/* high limit of file descriptor */
 	fd_set* p_fds;		/* Set of file descriptor */
 } CARGS, *P_CARGS;
-
-typedef struct timespec {
-	time_t tv_sec;
-	long tv_nsec;
-}TIMESPEC;
 
 enum _SYS_FLAGS_WAIT_TYPES
 {

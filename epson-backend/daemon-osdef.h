@@ -20,8 +20,10 @@
 #ifndef _WIN_DEF_
 #define _WIN_DEF_
 
-#include "epson-def.h"
 #include <stdint.h>
+#include <pthread.h>
+#include "epson-def.h"
+
 
 typedef uint32_t	ULONG;
 typedef ULONG 		*PULONG;
@@ -50,6 +52,7 @@ typedef UCHAR 		*PUCHAR;
 #define CONST           const
 #endif
 
+#ifndef _WINNT_
 typedef int32_t         INT;
 typedef int32_t         LONG;
 typedef uint32_t        DWORD;
@@ -83,14 +86,16 @@ typedef CHAR		*LPSTR, *PSTR;
 typedef CONST CHAR	*LPCSTR, *PCSTR;
 typedef CHAR		*LPTSTR, *PTSTR;
 typedef CONST CHAR	*LPCTSTR, *PCTSTR;
+#endif
 
-
+#ifndef _MINWINDEF_
 #define MAKEWORD(a, b)      ((WORD)(((BYTE)(a)) | ((WORD)((BYTE)(b))) << 8))
 #define MAKELONG(a, b)      ((LONG)(((WORD)(a)) | ((DWORD)((WORD)(b))) << 16))
 #define LOWORD(l)           ((WORD)(l))
 #define HIWORD(l)           ((WORD)(((DWORD)(l) >> 16) & 0xFFFF))
 #define LOBYTE(w)           ((BYTE)(w))
 #define HIBYTE(w)           ((BYTE)(((WORD)(w) >> 8) & 0xFF))
+#endif
 
 /*  typedef void 		*HANDLE; */
 typedef HANDLE          *LPHANDLE, *PHANDLE;
@@ -101,7 +106,7 @@ typedef void            VOID;
 typedef DWORD(*PTHREAD_START_ROUTINE) (LPVOID);
 typedef PTHREAD_START_ROUTINE LPTHREAD_START_ROUTINE;
 
-#define FAR
+//#define FAR
 
 #define DLL_PROCESS_ATTACH            1
 #define DLL_PROCESS_DETACH            0
@@ -216,8 +221,6 @@ typedef struct _SECURITY_ATTRIBUTES
 
 #define WAIT_FAILED (DWORD)0xFFFFFFFF
 #define WAIT_OBJECT_0 ((STATUS_WAIT_0) + 0)
-
-#include <pthread.h>
 
 typedef struct _WIN_EVENT_OBJECT
 {

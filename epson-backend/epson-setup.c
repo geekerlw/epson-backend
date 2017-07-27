@@ -31,7 +31,6 @@
 #include <sys/stat.h>
 //#include <sys/ioctl.h>
 #include <fcntl.h>
-#include <Windows.h>
 //#include <unistd.h>
 #include <stdio.h>
 #include <string.h>

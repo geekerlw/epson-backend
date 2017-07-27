@@ -36,7 +36,6 @@
 
 typedef void* HANDLE;
 
-
 /* Debug massage */
 
 #ifdef _DEBUG
@@ -51,4 +50,3 @@ typedef void* HANDLE;
 #endif
 
 #endif /* __CBTD_DEF_H__ */
-

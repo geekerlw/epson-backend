@@ -30,12 +30,11 @@
 //#include <sys/time.h>
 //#include <pthread.h>
 
-#include <time.h>
-#include <Windows.h>
+#include <pthread.h>
 #include <stdlib.h>
 #include <sys/types.h>
-#include <pthread.h>
-#include "epson-thread.h"
+
+#include "epson-def.h"
 
 //#pragma comment(lib,"pthreadVSE2.lib")
 
@@ -248,7 +247,7 @@ int wait_sysflags(P_CBTD_INFO p_info, int set_flags,
 		if (sec)
 		{
 			struct timeval now;
-			TIMESPEC timeout;
+			struct timespec timeout;
 
 			gettimeofday(&now, NULL);
 			timeout.tv_sec = now.tv_sec + sec;
