@@ -27,11 +27,18 @@
 #  include <config.h>
 #endif
 
+
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <assert.h>
-#include <winsock2.h>
+#include <time.h>
+#include <WinSock2.h>
+#include <Windows.h>
+
+#define HAVE_STRUCT_TIMESPEC
 #include <pthread.h>
+
 #include <sys/types.h>
 
 #include "epson-def.h"
@@ -39,7 +46,7 @@
 #include "epson-thread.h"
 #include "epson-daemon.h"
 
-//#pragma comment(lib,"pthreadVSE2.lib")
+#pragma comment(lib,"x86/pthreadVSE2.lib")
 
 /* structure for semaphore */
 typedef struct _SEM_OBJECT
@@ -48,6 +55,25 @@ typedef struct _SEM_OBJECT
 	pthread_cond_t cond;
 	int status_flag;
 } SEM_OBJECT, *P_SEM_OBJECT;
+
+static int gettimeofday(struct timeval *tp, void *tzp)
+{
+	time_t clock;
+	struct tm tm;
+	SYSTEMTIME wtm;
+	GetLocalTime(&wtm);
+	tm.tm_year = wtm.wYear - 1900;
+	tm.tm_mon = wtm.wMonth - 1;
+	tm.tm_mday = wtm.wDay;
+	tm.tm_hour = wtm.wHour;
+	tm.tm_min = wtm.wMinute;
+	tm.tm_sec = wtm.wSecond;
+	tm.tm_isdst = -1;
+	clock = mktime(&tm);
+	tp->tv_sec = (long)clock;
+	tp->tv_usec = wtm.wMilliseconds * 1000;
+	return (0);
+}
 
 /* Make thread and start it */
 void* init_thread(int stack_size, void* function, void* param)

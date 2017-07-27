@@ -216,19 +216,19 @@ static void cbtd_control(void)
 
 		if (info.devfd >= 0)
 		{
-			close(info.devfd);
+			//close(info.devfd);
 			_DEBUG_MESSAGE("deconnect printer\n");
 			info.devfd = -1;
 
 			if (!is_sysflags(&info, ST_SYS_DOWN))
-				sleep(2);
+				Sleep(2);
 		}
 	}
 
 	/* wait for end of other thread */
 	while (info.datatrans_thread_status != THREAD_DOWN
 		|| info.comserv_thread_status != THREAD_DOWN)
-		sleep(1);
+		Sleep(1);
 
 	end_cbtd(&info);
 	return;
