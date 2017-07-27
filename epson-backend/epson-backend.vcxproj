@@ -142,14 +142,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="daemon-osfunc.c" />
     <ClCompile Include="epson-comserv.c" />
     <ClCompile Include="epson-datatrans.c" />
     <ClCompile Include="epson-daemon.c" />
+    <ClCompile Include="epson-setup.c" />
+    <ClCompile Include="epson-signal.c" />
     <ClCompile Include="epson-thread.c" />
+    <ClCompile Include="epson-wrapper.c" />
+    <ClCompile Include="espon-command.c" />
+    <ClCompile Include="espon-hw.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="daemon-osfunc.h" />
+    <ClInclude Include="daemon_osdef.h" />
     <ClInclude Include="epson-daemon.h" />
+    <ClInclude Include="epson-def.h" />
     <ClInclude Include="epson-thread.h" />
+    <ClInclude Include="epson-typedefs.h" />
+    <ClInclude Include="epson-wrapper.h" />
+    <ClInclude Include="espon-hw.h" />
+    <ClInclude Include="espon-lcl.h" />
+    <ClInclude Include="libepson.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

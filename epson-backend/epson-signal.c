@@ -27,44 +27,36 @@
 #  include <config.h>
 #endif
 
-#ifndef __CBTD_THREAD_H__
-#define __CBTD_THREAD_H__
-
-#include <Windows.h>
-#include <sys/types.h>
-//#include <pthread.h>
-#include "epson-def.h"
+#include <signal.h>
 #include "epson-daemon.h"
+#include "epson-thread.h"
 
-/* information to do cleanup of a system */
-typedef struct _CLEANUP_ARGS
+static void kill_cbtd(int);
+extern int pid_fd;
+
+/* Setting of signal handler */
+void
+sig_set(void)
 {
-	P_CBTD_INFO p_info;		/* daemon infomation */
-	int* p_max;			/* high limit of file descriptor */
-	fd_set* p_fds;		/* Set of file descriptor */
-} CARGS, *P_CARGS;
+	//signal(SIGHUP, kill_cbtd);
+	signal(SIGINT, kill_cbtd);
+	//signal(SIGQUIT, kill_cbtd);
+	signal(SIGTERM, kill_cbtd);
 
-enum _SYS_FLAGS_WAIT_TYPES
+	return;
+}
+
+
+/* Signal handler */
+static void
+kill_cbtd(int sig)
 {
-	WAIT_SYS_OR = 0,  /* wait for even condition one if flags fill it */
-	WAIT_SYS_AND		   /* wait if flags satisfy every condition */
-};
-
-
-HANDLE init_thread(int, void*, void*);
-void delete_thread(HANDLE);
-//void wait_thread_down(void*, int);
-void cancel_thread(void*);
-
-HANDLE init_critical(void);
-void enter_critical(HANDLE);
-void leave_critical(HANDLE);
-void delete_critical(HANDLE);
-
-void set_sysflags(P_CBTD_INFO, int);
-void reset_sysflags(P_CBTD_INFO, int);
-int is_sysflags(P_CBTD_INFO, int);
-int wait_sysflags(P_CBTD_INFO, int, int, int, int);
-
-
-#endif /* __CBTD_THREAD_H__ */
+	_DEBUG_MESSAGE_VAL("Signal handler called : ", sig);
+	if (-1 != pid_fd)
+	{
+		close(pid_fd);
+	}
+	unlink(PID_PATH);
+	_exit(0);
+	return;
+}
