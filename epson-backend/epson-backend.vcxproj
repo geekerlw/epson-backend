@@ -87,7 +87,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,7 +115,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,19 +150,19 @@
     <ClCompile Include="epson-signal.c" />
     <ClCompile Include="epson-thread.c" />
     <ClCompile Include="epson-wrapper.c" />
-    <ClCompile Include="espon-command.c" />
-    <ClCompile Include="espon-hw.c" />
+    <ClCompile Include="epson-command.c" />
+    <ClCompile Include="epson-hw.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="daemon-osdef.h" />
     <ClInclude Include="daemon-osfunc.h" />
-    <ClInclude Include="daemon_osdef.h" />
     <ClInclude Include="epson-daemon.h" />
     <ClInclude Include="epson-def.h" />
     <ClInclude Include="epson-thread.h" />
     <ClInclude Include="epson-typedefs.h" />
     <ClInclude Include="epson-wrapper.h" />
-    <ClInclude Include="espon-hw.h" />
-    <ClInclude Include="espon-lcl.h" />
+    <ClInclude Include="epson-hw.h" />
+    <ClInclude Include="epson-local.h" />
     <ClInclude Include="libepson.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

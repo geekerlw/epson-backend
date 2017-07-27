@@ -1,4 +1,4 @@
-#include "epson-typdefs.h"
+#include "epson-typedefs.h"
 #include <stdio.h>
 #include <time.h>
 

@@ -27,12 +27,9 @@
 #  include <config.h>
 #endif
 
-#ifndef __CBTD_THREAD_H__
-#define __CBTD_THREAD_H__
+#ifndef __EPSON_THREAD_H__
+#define __EPSON_THREAD_H__
 
-#include <Windows.h>
-#include <sys/types.h>
-//#include <pthread.h>
 #include "epson-def.h"
 #include "epson-daemon.h"
 
@@ -44,6 +41,11 @@ typedef struct _CLEANUP_ARGS
 	fd_set* p_fds;		/* Set of file descriptor */
 } CARGS, *P_CARGS;
 
+typedef struct timespec {
+	time_t tv_sec;
+	long tv_nsec;
+}TIMESPEC;
+
 enum _SYS_FLAGS_WAIT_TYPES
 {
 	WAIT_SYS_OR = 0,  /* wait for even condition one if flags fill it */
@@ -53,7 +55,6 @@ enum _SYS_FLAGS_WAIT_TYPES
 
 HANDLE init_thread(int, void*, void*);
 void delete_thread(HANDLE);
-//void wait_thread_down(void*, int);
 void cancel_thread(void*);
 
 HANDLE init_critical(void);
@@ -66,5 +67,4 @@ void reset_sysflags(P_CBTD_INFO, int);
 int is_sysflags(P_CBTD_INFO, int);
 int wait_sysflags(P_CBTD_INFO, int, int, int, int);
 
-
-#endif /* __CBTD_THREAD_H__ */
+#endif /* __EPSON_THREAD_H__ */

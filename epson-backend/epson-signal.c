@@ -28,35 +28,35 @@
 #endif
 
 #include <signal.h>
+#include <fcntl.h>
 #include "epson-daemon.h"
 #include "epson-thread.h"
 
-static void kill_cbtd(int);
 extern int pid_fd;
 
-/* Setting of signal handler */
-void
-sig_set(void)
-{
-	//signal(SIGHUP, kill_cbtd);
-	signal(SIGINT, kill_cbtd);
-	//signal(SIGQUIT, kill_cbtd);
-	signal(SIGTERM, kill_cbtd);
-
-	return;
-}
-
-
 /* Signal handler */
-static void
-kill_cbtd(int sig)
+static void kill_cbtd(int sig)
 {
 	_DEBUG_MESSAGE_VAL("Signal handler called : ", sig);
+	/*
 	if (-1 != pid_fd)
 	{
 		close(pid_fd);
 	}
 	unlink(PID_PATH);
 	_exit(0);
+
+	*/
+	return;
+}
+
+/* Setting of signal handler */
+void sig_set(void)
+{
+	//signal(SIGHUP, kill_cbtd);
+	signal(SIGINT, kill_cbtd);
+	//signal(SIGQUIT, kill_cbtd);
+	signal(SIGTERM, kill_cbtd);
+
 	return;
 }

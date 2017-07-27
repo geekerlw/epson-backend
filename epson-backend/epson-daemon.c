@@ -50,7 +50,7 @@
 *           0x03 Memory shortage
 */
 #ifdef HAVE_CONFIG_H
-#  include <config.h>
+#include <config.h>
 #endif
 
 #include <sys/types.h>
@@ -63,7 +63,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "epson-daemon.h"
-//#include "libcbt.h"
+#include "libepson.h"
 #include "epson-thread.h"
 #include "epson-typedefs.h"
 
@@ -74,115 +74,142 @@
     -p pidfile\n\
         Use specified file as pid file"
 
-
-static void cbtd_control(void);
-static int prt_connect(P_CBTD_INFO);
-static void init_cbtd(P_CBTD_INFO);
-static int init_epson_cbt(P_CBTD_INFO);
-
 int pid_fd = -1;
 
-int
-main(int argc, char* argv[])
+/* connect a printer */
+/*
+ * todo: open /dev/usb/lp0 in linux
+ * not the same with linux , maybe libusb is a
+ * good way to do this
+ * 所有操作应该转移到 epson-setup.c里面去做
+ */
+static int prt_connect(P_CBTD_INFO p_info)
 {
-#ifndef _DEBUG
-	long pid;
-	char buf[255];
-	int len;
-	int num;
-	char default_pid_path[] = PID_PATH;
+	int *fd = &p_info->devfd;
 	int i;
-	char *pid_path;
+	int error = 1;
 
-	pid_path = &default_pid_path[0];
-	for (i = 1; i < argc; i++) {
-		if ((0 == strncmp(argv[i], "-p", (strlen("-p") + 1)))
-			&& (argc > i + 1)
-			) {
-			pid_path = argv[i + 1];
-			i++;
+	if (is_sysflags(p_info, ST_SYS_DOWN))
+		return -1;
+
+	for (i = 0; i < 5; i++)
+	{
+		error = parameter_update(p_info);
+
+		if (error == 0) {
+			*fd = open(p_info->devprt_path, O_RDWR);
 		}
-		else if ((0 == strncmp(argv[i], "-v", (strlen("-v") + 1)))
-			|| (0 == strncmp(argv[i], "--version", (strlen("--version") + 1)))
-			) {
-			fprintf(stderr, "%s\n", ECBD_VERSION);
-			return 0;
+		else {
+			*fd = (-1);
 		}
-		else if ((0 == strncmp(argv[i], "-u", (strlen("-u") + 1)))
-			|| (0 == strncmp(argv[i], "--usage", (strlen("--usage") + 1)))
-			) {
-			fprintf(stderr, "%s\n", ECBD_USAGE);
-			return 0;
+
+		if (*fd < 0)
+		{
+			usleep(50000);
 		}
-		else if ((0 == strncmp(argv[i], "-h", (strlen("-h") + 1)))
-			|| (0 == strncmp(argv[i], "--help", (strlen("--help") + 1)))
-			) {
-			fprintf(stderr, "%s\n%s\n", ECBD_VERSION, ECBD_USAGE);
-			return 0;
+		else
+		{
+			_DEBUG_MESSAGE("connect printer\n");
+			return *fd;
 		}
 	}
 
-	if (geteuid() != 0)
-	{
-		fprintf(stderr, "must run as root\n");
-		return 1;
-	}
-
-	/* start create ecbd.pid file */
-	if (-1 == (pid_fd = open(pid_path, O_RDWR | O_CREAT, 0600)))
-	{
-		fprintf(stderr, "failed to open %s\n", pid_path);
-		return 1;
-	}
-	if (-1 == flock(pid_fd, LOCK_EX | LOCK_NB)) {
-		/* pid file already exist */
-		fprintf(stderr, "failed to lock %s\n", pid_path);
-		return 1;
-	}
-	fchmod(pid_fd, 0644);
-	fcntl(pid_fd, F_SETFD, 1); /* set FD_CLOEXEC */
-							   /* end create ecbd.pid file */
-
-							   /* shift to daemon process */
-	if ((pid = fork()))
-	{
-		exit(0);
-	}
-	if (pid < 0)
-	{
-		perror("fork() failtd");
-		return 1;
-	}
-
-	/* write pid to /var/run/ecbd.pid */
-	sprintf(buf, "%ld\n", (long)getpid());
-	lseek(pid_fd, (off_t)0, SEEK_SET);
-	len = strlen(buf);
-	if ((num = write(pid_fd, buf, len)) != len)
-	{
-		fprintf(stderr, "write() failed:\n");
-		return 1;
-	}
-
-#endif
-
-	cbtd_control();
-	return 0;
+	//_DEBUG_FUNC(perror(devprt_path));
+	_DEBUG_MESSAGE("waiting.....\n");
+	sleep(3);
+	return *fd;
 }
 
+/* initialize CBT */
+static int init_epson_cbt(P_CBTD_INFO p_info)
+{
+	start_ecbt_engine();
+	return open_port_driver(p_info);
+}
+
+/* end of CBT */
+int end_epson_cbt(P_CBTD_INFO p_info)
+{
+	int err = 0;
+
+	err = close_port_driver(p_info);
+	end_ecbt_engine();
+
+	return err;
+}
+
+/* initialize process */
+static void init_cbtd(P_CBTD_INFO p_info)
+{
+	memset(p_info, 0, sizeof(CBTD_INFO));
+
+	/* default setup */
+	/* todo: windows has no port and fifo path */
+	strcpy(p_info->devprt_path, DEVICE_PATH);
+	strcpy(p_info->infifo_path, FIFO_PATH);
+	
+	p_info->comsock_port = DAEMON_PORT;
+
+	p_info->devfd = -1;
+
+	p_info->sysflags = 0;
+	p_info->sysflags_critical = init_critical();
+
+	p_info->ecbt_accsess_critical = init_critical();
+	assert(p_info->sysflags_critical != NULL
+		&& p_info->ecbt_accsess_critical != NULL);
+
+	p_info->datatrans_thread_status = THREAD_RUN;
+	p_info->comserv_thread_status = THREAD_RUN;
+
+	p_info->datatrans_thread
+		= init_thread(CBTD_THREAD_STACK_SIZE,
+		(void *)datatrans_thread,
+			(void *)p_info);
+
+	p_info->comserv_thread
+		= init_thread(CBTD_THREAD_STACK_SIZE,
+		(void *)comserv_thread,
+			(void *)p_info);
+
+	assert(p_info->datatrans_thread != NULL
+		&& p_info->comserv_thread != NULL);
+
+	return;
+}
+
+/* end of process */
+void end_cbtd(P_CBTD_INFO p_info)
+{
+	if (p_info->datatrans_thread)
+		delete_thread(p_info->datatrans_thread);
+
+	if (p_info->comserv_thread)
+		delete_thread(p_info->comserv_thread);
+
+
+	if (p_info->sysflags_critical)
+		delete_critical(p_info->sysflags_critical);
+
+	if (p_info->ecbt_accsess_critical)
+		delete_critical(p_info->ecbt_accsess_critical);
+
+	return;
+}
 
 /* main thread */
-static void
-cbtd_control(void)
+static void cbtd_control(void)
 {
 	CBTD_INFO info;
 	int set_flags, reset_flags;
 
 	init_cbtd(&info);
-	sig_set();
+	/* todo: no need to set singal, no pid found since we don't get pid first*/
+	//sig_set();
 
 	while (!is_sysflags(&info, ST_SYS_DOWN))
 	{
+		/* turn into the main loop */
 		for (;;)
 		{
 			set_flags = 0;
@@ -243,126 +270,8 @@ cbtd_control(void)
 	return;
 }
 
-
-/* connect a printer */
-static int
-prt_connect(P_CBTD_INFO p_info)
+int main()
 {
-	int *fd = &p_info->devfd;
-	int i;
-	int error = 1;
-
-	if (is_sysflags(p_info, ST_SYS_DOWN))
-		return -1;
-
-	for (i = 0; i < 5; i++)
-	{
-		error = parameter_update(p_info);
-
-		if (error == 0) {
-			*fd = open(p_info->devprt_path, O_RDWR);
-		}
-		else {
-			*fd = (-1);
-		}
-
-		if (*fd < 0)
-		{
-			usleep(50000);
-		}
-		else
-		{
-			_DEBUG_MESSAGE("connect printer\n");
-			return *fd;
-		}
-	}
-
-	//_DEBUG_FUNC(perror(devprt_path));
-	_DEBUG_MESSAGE("waiting.....\n");
-	sleep(3);
-	return *fd;
-}
-
-
-/* initialize process */
-static void
-init_cbtd(P_CBTD_INFO p_info)
-{
-	memset(p_info, 0, sizeof(CBTD_INFO));
-
-	/* default setup */
-	strcpy(p_info->devprt_path, DEVICE_PATH);
-	strcpy(p_info->infifo_path, FIFO_PATH);
-	p_info->comsock_port = DAEMON_PORT;
-
-
-	p_info->devfd = -1;
-
-	p_info->sysflags = 0;
-	p_info->sysflags_critical = init_critical();
-
-	p_info->ecbt_accsess_critical = init_critical();
-	assert(p_info->sysflags_critical != NULL
-		&& p_info->ecbt_accsess_critical != NULL);
-
-	p_info->datatrans_thread_status = THREAD_RUN;
-	p_info->comserv_thread_status = THREAD_RUN;
-
-	p_info->datatrans_thread
-		= init_thread(CBTD_THREAD_STACK_SIZE,
-		(void *)datatrans_thread,
-			(void *)p_info);
-
-	p_info->comserv_thread
-		= init_thread(CBTD_THREAD_STACK_SIZE,
-		(void *)comserv_thread,
-			(void *)p_info);
-
-	assert(p_info->datatrans_thread != NULL
-		&& p_info->comserv_thread != NULL);
-
-	return;
-}
-
-
-/* end of process */
-void
-end_cbtd(P_CBTD_INFO p_info)
-{
-	if (p_info->datatrans_thread)
-		delete_thread(p_info->datatrans_thread);
-
-	if (p_info->comserv_thread)
-		delete_thread(p_info->comserv_thread);
-
-
-	if (p_info->sysflags_critical)
-		delete_critical(p_info->sysflags_critical);
-
-	if (p_info->ecbt_accsess_critical)
-		delete_critical(p_info->ecbt_accsess_critical);
-
-	return;
-}
-
-
-/* initialize CBT */
-static int
-init_epson_cbt(P_CBTD_INFO p_info)
-{
-	start_ecbt_engine();
-	return open_port_driver(p_info);
-}
-
-
-/* end of CBT */
-int
-end_epson_cbt(P_CBTD_INFO p_info)
-{
-	int err = 0;
-
-	err = close_port_driver(p_info);
-	end_ecbt_engine();
-
-	return err;
+	cbtd_control();
+	return 0;
 }

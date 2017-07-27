@@ -22,7 +22,6 @@
 
 #include "epson-def.h"
 #include <stdint.h>
-#include <pthread.h>
 
 typedef uint32_t	ULONG;
 typedef ULONG 		*PULONG;
@@ -218,6 +217,8 @@ typedef struct _SECURITY_ATTRIBUTES
 #define WAIT_FAILED (DWORD)0xFFFFFFFF
 #define WAIT_OBJECT_0 ((STATUS_WAIT_0) + 0)
 
+#include <pthread.h>
+
 typedef struct _WIN_EVENT_OBJECT
 {
 	char id;
@@ -243,5 +244,4 @@ typedef struct _WIN_THREAD_OBJECT
 } WIN_THREAD_OBJECT, *LP_WIN_THREAD_OBJECT;
 
 #endif /* _WIN_DEF_ */
-
 

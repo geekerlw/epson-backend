@@ -156,9 +156,8 @@ get_printer_devpath(const char * printer, char * path, int sizePath)
 	return 0;
 }
 
-
-int
-parameter_update(P_CBTD_INFO p_info)
+// todo: 应该从这里获取到打印机的端口信息，libusb来做
+int parameter_update(P_CBTD_INFO p_info)
 {
 	return get_printer_devpath("ESCP", p_info->devprt_path, sizeof(p_info->devprt_path));
 }

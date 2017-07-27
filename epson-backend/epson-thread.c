@@ -28,11 +28,16 @@
 #endif
 
 //#include <sys/time.h>
+//#include <pthread.h>
+
 #include <time.h>
 #include <Windows.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <pthread.h>
 #include "epson-thread.h"
 
+//#pragma comment(lib,"pthreadVSE2.lib")
 
 /* structure for semaphore */
 typedef struct _SEM_OBJECT
@@ -42,10 +47,8 @@ typedef struct _SEM_OBJECT
 	int status_flag;
 } SEM_OBJECT, *P_SEM_OBJECT;
 
-
 /* Make thread and start it */
-void*
-init_thread(int stack_size, void* function, void* param)
+void* init_thread(int stack_size, void* function, void* param)
 {
 	pthread_t* p_thread;
 	pthread_attr_t attr;
@@ -63,10 +66,8 @@ init_thread(int stack_size, void* function, void* param)
 	return (void*)p_thread;
 }
 
-
 /* Thread stop and delete it */
-void
-delete_thread(void* handle)
+void delete_thread(void* handle)
 {
 	pthread_t* p_thread = (pthread_t*)handle;
 
@@ -81,19 +82,15 @@ delete_thread(void* handle)
 	return;
 }
 
-
 /* Cancel thread */
-void
-cancel_thread(void* handle)
+void cancel_thread(void* handle)
 {
 	pthread_cancel(*(pthread_t *)handle);
 	return;
 }
 
-
 /* Initialize semaphore */
-HANDLE
-init_critical(void)
+HANDLE init_critical(void)
 {
 	P_SEM_OBJECT p_semobj;
 	int err = 0;
@@ -112,10 +109,8 @@ init_critical(void)
 	return (HANDLE)p_semobj;
 }
 
-
 /* Critical section begins */
-void
-enter_critical(HANDLE handle)
+void enter_critical(HANDLE handle)
 {
 	P_SEM_OBJECT p_semobj = (P_SEM_OBJECT)handle;
 	int err = 0;
@@ -135,10 +130,8 @@ enter_critical(HANDLE handle)
 	return;
 }
 
-
 /* Critical section ends */
-void
-leave_critical(HANDLE handle)
+void leave_critical(HANDLE handle)
 {
 	P_SEM_OBJECT p_semobj = (P_SEM_OBJECT)handle;
 	int err = 0;
@@ -156,8 +149,7 @@ leave_critical(HANDLE handle)
 
 
 /* Delete semaphore */
-void
-delete_critical(HANDLE handle)
+void delete_critical(HANDLE handle)
 {
 	P_SEM_OBJECT p_semobj = (P_SEM_OBJECT)handle;
 	int err = 0;
@@ -175,8 +167,7 @@ delete_critical(HANDLE handle)
 
 
 /* Turn the flag of system state into ON */
-void
-set_sysflags(P_CBTD_INFO p_info, int flags)
+void set_sysflags(P_CBTD_INFO p_info, int flags)
 {
 	P_SEM_OBJECT p_semobj = (P_SEM_OBJECT)p_info->sysflags_critical;
 	int err = 0;
@@ -193,10 +184,8 @@ set_sysflags(P_CBTD_INFO p_info, int flags)
 	return;
 }
 
-
 /* Turn the flag of system state into OFF */
-void
-reset_sysflags(P_CBTD_INFO p_info, int flags)
+void reset_sysflags(P_CBTD_INFO p_info, int flags)
 {
 	P_SEM_OBJECT p_semobj = (P_SEM_OBJECT)p_info->sysflags_critical;
 	int err = 0;
@@ -213,13 +202,11 @@ reset_sysflags(P_CBTD_INFO p_info, int flags)
 	return;
 }
 
-
-int
-is_sysflags(P_CBTD_INFO p_info, int flags)
+/* compare the p_info's flags with given flags follow */
+int is_sysflags(P_CBTD_INFO p_info, int flags)
 {
 	return p_info->sysflags & flags;
 }
-
 
 /* Wait till flag of system state is changed
 * wait_type
@@ -228,8 +215,7 @@ is_sysflags(P_CBTD_INFO p_info, int flags)
 *
 * returns zero on success, or 1 if an timeout.
 */
-int
-wait_sysflags(P_CBTD_INFO p_info, int set_flags,
+int wait_sysflags(P_CBTD_INFO p_info, int set_flags,
 	int reset_flags, int sec, int wait_type)
 {
 	P_SEM_OBJECT p_semobj = (P_SEM_OBJECT)p_info->sysflags_critical;
@@ -262,7 +248,7 @@ wait_sysflags(P_CBTD_INFO p_info, int set_flags,
 		if (sec)
 		{
 			struct timeval now;
-			struct timespec timeout;
+			TIMESPEC timeout;
 
 			gettimeofday(&now, NULL);
 			timeout.tv_sec = now.tv_sec + sec;

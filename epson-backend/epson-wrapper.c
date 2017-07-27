@@ -23,9 +23,10 @@
 //#include <unistd.h>
 #include <Windows.h>
 #include <stdio.h>
-#include "ecbteg.h"
+#include "epson-hw.h"
 #include "epson-thread.h"
 #include "epson-wrapper.h"
+
 
 /* Repeat number of times when communication error with printer
 occurred. */
@@ -33,24 +34,21 @@ occurred. */
 
 
 /* Initialize ECBT */
-int
-start_ecbt_engine(void)
+int start_ecbt_engine(void)
 {
 	return DllMain(NULL, DLL_PROCESS_ATTACH, NULL);
 }
 
 
 /* Finish ECBT */
-int
-end_ecbt_engine(void)
+int end_ecbt_engine(void)
 {
 	return DllMain(NULL, DLL_PROCESS_DETACH, NULL);
 }
 
 
 /* Open CBT and open CTRL channel at the same time */
-int
-open_port_driver(P_CBTD_INFO p_info)
+int open_port_driver(P_CBTD_INFO p_info)
 {
 	int err;
 

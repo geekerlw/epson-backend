@@ -138,4 +138,6 @@ typedef enum
   STS_DEFAULT
 }DAEMON_STS;
 
-#endif /* for EPSON_TYPEDEFS_H_ */
+#endif /* for EPSON_TYPEDEFS_H_ */        
+
+

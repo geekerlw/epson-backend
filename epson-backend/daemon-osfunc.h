@@ -20,7 +20,7 @@
 #ifndef __WINFUNC_H__
 #define __WINFUNC_H__
 
-#include "daemon_osdef.h"
+#include "daemon-osdef.h"
 
 HLOCAL LocalAlloc(UINT uFlags, UINT uBytes);
 HLOCAL LocalFree(HLOCAL hMem);
@@ -56,4 +56,3 @@ VOID ExitThread(DWORD dwExitCode);
 HANDLE GetCurrentThread(VOID);
 
 #endif /* __WINFUNC_H__ */
-

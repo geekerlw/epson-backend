@@ -25,7 +25,7 @@
 \******************************************************************************/
 #ifndef __ECBTEG_H
 #define __ECBTEG_H
-#include "daemon_osdef.h"
+#include "daemon-osdef.h"
 
 /******************************************************************************\
 *                              SYMBOLIC CONSTANTS
@@ -133,4 +133,3 @@ int ECBT_Read(HANDLE hECBT, BYTE SID, LPBYTE lpBuffer, LPINT lpSize);
 
 
 #endif			//  __ECBTEG_H
-

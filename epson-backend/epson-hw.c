@@ -35,10 +35,10 @@
 *
 */
 #include <string.h>
-#include "daemon_osdef.h"
-#include "ecbteg.h"
-#include "ecbt_lcl.h"
-#include "daemon_osfunc.h"
+#include "daemon-osdef.h"
+#include "epson-hw.h"
+#include "epson-local.h"
+#include "daemon-osfunc.h"
 
 void ReadThread(LPVOID param);
 
@@ -3565,7 +3565,7 @@ VOID DummyRead_Fnc(LPPORT pPort)
 {
 	int     fRet;
 	DWORD    cnt;
-	int     Bcnt = 1024;
+	DWORD     Bcnt = 1024;
 	BYTE    BUFFER[1024];
 
 

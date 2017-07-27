@@ -36,10 +36,10 @@
     <ClCompile Include="epson-wrapper.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="espon-hw.c">
+    <ClCompile Include="epson-command.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="espon-command.c">
+    <ClCompile Include="epson-hw.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="daemon-osfunc.c">
@@ -62,19 +62,19 @@
     <ClInclude Include="epson-typedefs.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="espon-hw.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="espon-lcl.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="libepson.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="daemon-osfunc.h">
+    <ClInclude Include="epson-local.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="daemon_osdef.h">
+    <ClInclude Include="epson-hw.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="daemon-osdef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="daemon-osfunc.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
