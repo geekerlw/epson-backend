@@ -26,7 +26,7 @@
 #include "epson-hw.h"
 #include "epson-thread.h"
 #include "epson-wrapper.h"
-
+#include "epson-daemon.h"
 
 /* Repeat number of times when communication error with printer
 occurred. */
@@ -38,13 +38,11 @@ int start_ecbt_engine(void)
 	return DllMain(NULL, DLL_PROCESS_ATTACH, NULL);
 }
 
-
 /* Finish ECBT */
 int end_ecbt_engine(void)
 {
 	return DllMain(NULL, DLL_PROCESS_DETACH, NULL);
 }
-
 
 /* Open CBT and open CTRL channel at the same time */
 int open_port_driver(P_CBTD_INFO p_info)
@@ -65,10 +63,8 @@ int open_port_driver(P_CBTD_INFO p_info)
 		return 0;
 }
 
-
 /* Close CBT */
-int
-close_port_driver(P_CBTD_INFO p_info)
+int close_port_driver(P_CBTD_INFO p_info)
 {
 	int err;
 
@@ -89,10 +85,8 @@ close_port_driver(P_CBTD_INFO p_info)
 		return 0;
 }
 
-
 /* Open channel */
-int
-open_port_channel(P_CBTD_INFO p_info, char sid)
+int open_port_channel(P_CBTD_INFO p_info, char sid)
 {
 	int err;
 
@@ -106,10 +100,8 @@ open_port_channel(P_CBTD_INFO p_info, char sid)
 	return 0;
 }
 
-
 /* Close channel */
-int
-close_port_channel(P_CBTD_INFO p_info, char sid)
+int close_port_channel(P_CBTD_INFO p_info, char sid)
 {	
 	if (p_info->ecbt_handle)
 	{
@@ -121,8 +113,7 @@ close_port_channel(P_CBTD_INFO p_info, char sid)
 }
 
 /* write to ECBT */
-int
-write_to_prt(P_CBTD_INFO p_info, char sid,
+int write_to_prt(P_CBTD_INFO p_info, char sid,
 	char* buffer, int* p_size)
 {
 	int count = 0;
@@ -137,7 +128,8 @@ write_to_prt(P_CBTD_INFO p_info, char sid,
 			|| err == CBT_ERR_WRITETIMEOUT
 			|| err == CBT_ERR_WRITEERROR) && *p_size == 0)
 		{
-			Sleep(10);
+			/* todo: usleep(10000) */
+			usleep(10000);
 		}
 
 		else
@@ -162,10 +154,8 @@ write_to_prt(P_CBTD_INFO p_info, char sid,
 	return 0;
 }
 
-
 /* read from ECBT */
-int
-read_from_prt(P_CBTD_INFO p_info, char sid,
+int read_from_prt(P_CBTD_INFO p_info, char sid,
 	char* buffer, int* p_size)
 {
 	int count = 0;
@@ -180,7 +170,8 @@ read_from_prt(P_CBTD_INFO p_info, char sid,
 		if (err == CBT_ERR_FNCDISABLE
 			|| err == CBT_ERR_READERROR || *p_size == 0)
 		{
-			Sleep(1);
+			/* todo: unsleep(10000) */
+			usleep(10000);
 		}
 		else
 		{

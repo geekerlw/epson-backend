@@ -23,15 +23,11 @@
 * the GNU General Public License in all respects for all of the
 * code used other then `cbt'.
 */
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
 #include <signal.h>
 #include "epson-daemon.h"
 #include "epson-thread.h"
 
-extern int pid_fd;
+//extern int pid_fd;
 
 /* Signal handler */
 static void kill_cbtd(int sig)

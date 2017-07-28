@@ -85,7 +85,7 @@ enum _CBTD_SYSTEM_FLAGS {
 	ST_JOB_CANCEL_NO_D4 = 64 /* 01000000  wait for reset of a printer */
 };
 
-
+void usleep(__int64 usec); 
 void end_cbtd(P_CBTD_INFO);
 int end_epson_cbt(P_CBTD_INFO);
 void sig_set(void);

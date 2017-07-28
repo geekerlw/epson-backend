@@ -49,28 +49,32 @@
 *           0x02 Cannot communicate with a printer
 *           0x03 Memory shortage
 */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-
+#include <Windows.h>
 #include "epson-def.h"
 #include "epson-typedefs.h"
 #include "epson-daemon.h"
 #include "epson-thread.h"
 #include "epson-wrapper.h"
 
-
-#define ECBD_VERSION "* ecbd is a part of " PACKAGE_STRING
-
-#define ECBD_USAGE "Usage: $ ecbd [-p pidfile]\n\
-    -p pidfile\n\
-        Use specified file as pid file"
-
 //int pid_fd = -1;
+
+/* linux usleep simple support on windows */
+void usleep(__int64 usec) 
+{ 
+    HANDLE timer; 
+    LARGE_INTEGER ft; 
+
+	/* Convert to 100 nanosecond interval, negative value indicates relative time */
+    ft.QuadPart = -(10*usec); 
+
+    timer = CreateWaitableTimer(NULL, TRUE, NULL); 
+    SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0); 
+    WaitForSingleObject(timer, INFINITE); 
+    CloseHandle(timer); 
+}
 
 /* connect a printer */
 /*
@@ -168,8 +172,7 @@ static void cbtd_control(void)
 	int set_flags, reset_flags;
 
 	init_cbtd(&info);
-	/* todo: no need to set singal, no pid found since we don't get pid first*/
-	//sig_set();
+	sig_set();
 
 	while (!is_sysflags(&info, ST_SYS_DOWN))
 	{
@@ -216,19 +219,21 @@ static void cbtd_control(void)
 
 		if (info.devfd >= 0)
 		{
+			/* fixme: devfd maybe a HANDLE, so I use CloseHandle instead */
 			//close(info.devfd);
+			CloseHandle(&info.devfd);
 			_DEBUG_MESSAGE("deconnect printer\n");
 			info.devfd = -1;
 
 			if (!is_sysflags(&info, ST_SYS_DOWN))
-				Sleep(2);
+				Sleep(2000);
 		}
 	}
 
 	/* wait for end of other thread */
 	while (info.datatrans_thread_status != THREAD_DOWN
 		|| info.comserv_thread_status != THREAD_DOWN)
-		Sleep(1);
+		Sleep(1000);
 
 	end_cbtd(&info);
 	return;

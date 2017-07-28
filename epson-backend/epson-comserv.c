@@ -27,7 +27,6 @@
 #include <assert.h>
 #include <WinSock2.h>
 #include <Windows.h>
-//#include <WS2tcpip.h>
 #include "epson-def.h"
 #include "epson-typedefs.h"
 #include "epson-daemon.h"
@@ -57,7 +56,7 @@ static const char COMMAND_PACKET_KEY[] = "pcp";
 #define HIDE_INKLOW  (0x01 << 1)
 
 #ifndef MSG_NOSIGNAL
-#define MSG_NOSIGNAL 0x20
+#define MSG_NOSIGNAL 0x2000
 #endif
 
 #ifndef MSG_DONTWAIT
@@ -93,8 +92,7 @@ extern EPS_ERR_CODE epsMakeMainteCmd(
 );
 
 /* transmit a command to a printer and receive reply */
-static int
-write_prt_command(P_CBTD_INFO p_info, char* com_buf,
+static int write_prt_command(P_CBTD_INFO p_info, char* com_buf,
 	int com_size, char* rep_buf, int* rep_size)
 {
 
@@ -109,8 +107,7 @@ write_prt_command(P_CBTD_INFO p_info, char* com_buf,
 	enter_critical(p_info->ecbt_accsess_critical);
 	err = write_to_prt(p_info, SID_CTRL, com_buf, &com_size);
 
-	/* todo: no usleep here */
-	Sleep(1);
+	usleep (100000);
 
 
 	if (com_size)
@@ -147,11 +144,8 @@ write_prt_command(P_CBTD_INFO p_info, char* com_buf,
 }
 
 
-
-
 /* clear data left with a printer */
-static void
-clear_replay_buffer(P_CBTD_INFO p_info)
+static void clear_replay_buffer(P_CBTD_INFO p_info)
 {
 	char tmp_buf[REP_BUF_SIZE];
 	int read_size;
@@ -181,8 +175,7 @@ clear_replay_buffer(P_CBTD_INFO p_info)
 }
 
 
-static unsigned char *
-scan_bin_status(StField field, unsigned char *bdata, size_t bsize)
+static unsigned char* scan_bin_status(StField field, unsigned char *bdata, size_t bsize)
 {
 	unsigned char bheader[] = { '@', 'B', 'D', 'C', ' ', 'S', 'T', '2', 0x0d, 0x0a };
 	unsigned char *point;
@@ -205,8 +198,7 @@ scan_bin_status(StField field, unsigned char *bdata, size_t bsize)
 	return point;
 }
 
-static size_t
-change_status_format(P_CBTD_INFO p_info, unsigned char *bdata, size_t bsize,
+static size_t change_status_format(P_CBTD_INFO p_info, unsigned char *bdata, size_t bsize,
 	char *cdata, size_t csize)
 {
 	unsigned char bheader[] = { '@', 'B', 'D', 'C', ' ', 'S', 'T', '2', 0x0d, 0x0a };
@@ -451,8 +443,7 @@ change_status_format(P_CBTD_INFO p_info, unsigned char *bdata, size_t bsize,
 }
 
 /* get status of a printer */
-static int
-post_prt_status(P_CBTD_INFO p_info)
+static int post_prt_status(P_CBTD_INFO p_info)
 {
 	char get_status_command[] = { 's', 't', 0x01, 0x00, 0x01 };
 	char timer_set_command[] = { 't', 'i', 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -497,7 +488,7 @@ post_prt_status(P_CBTD_INFO p_info)
 		point = strstr(p_info->prt_status, "ST:");
 		if (point == NULL)
 		{		/* retry */
-			Sleep(1);
+			usleep (100000);
 			clear_replay_buffer(p_info);
 			return post_prt_status(p_info);
 		}
@@ -567,17 +558,21 @@ post_prt_status(P_CBTD_INFO p_info)
 }
 
 /* open a socket */
-static int
-servsock_open(int port)
+static int servsock_open(int port)
 {
-
+	/* fixme: maybe when we use socket on windows, 
+	 * we need to start up WSA first and close WSA
+	 * when use end. the function is WSAStartup
+	 */
 	int fd;
 	int opt = 1;
 
 	struct sockaddr_in addr;
 
+	/* 0 means IPPROTO_IP  dummy for IP */
 	fd = socket(AF_INET, SOCK_STREAM, 0);
-	if (fd < 0) return -1;
+	if (fd < 0) 
+		return -1;
 
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -590,8 +585,7 @@ servsock_open(int port)
 }
 
 /* read it from a socket */
-static int
-sock_read(int fd, char* buf, int read_size)
+static int sock_read(int fd, char* buf, int read_size)
 {
 	int i;
 	int size;
@@ -607,7 +601,7 @@ sock_read(int fd, char* buf, int read_size)
 		{
 			read_size -= size;
 			buf += size;
-			Sleep(1);
+			usleep (1000);
 		}
 		else
 			break;
@@ -616,8 +610,7 @@ sock_read(int fd, char* buf, int read_size)
 }
 
 /* write it to a socket */
-static int
-sock_write(int fd, char* buf, int write_size)
+static int sock_write(int fd, char* buf, int write_size)
 {
 	int i;
 	int size;
@@ -630,16 +623,16 @@ sock_write(int fd, char* buf, int write_size)
 		size = send(fd, buf, write_size, MSG_NOSIGNAL | MSG_DONTWAIT);
 		if (size == write_size)
 		{
-			/* todo: windows has no fsync, maybe use flush instead */
+			/* todo: windows has no fsync, maybe use fflush instead */
 			//fsync(fd);
-			//flush(fd);
+			//fflush(fd);
 			return 0;
 		}
 		else if (size > 0)
 		{
 			write_size -= size;
 			buf += size;
-			Sleep(1);
+			usleep (1000);
 		}
 		else
 			break;
@@ -650,8 +643,7 @@ sock_write(int fd, char* buf, int write_size)
 
 
 /* transmit packet */
-static void
-reply_send(int fd, char* buf, int size)
+static void reply_send(int fd, char* buf, int size)
 {
 	char packet[REP_BUF_SIZE + PAC_HEADER_SIZE];
 	char header[] = { 'p', 'c', 'p', 0x00, 0x00 };
@@ -716,8 +708,7 @@ int SendCommand(char* pCmd, int nCmdSize)
 }
 
 /* transmit error packet */
-static int
-error_recept(int fd, int err_code)
+static int error_recept(int fd, int err_code)
 {
 	char err_packet[] = { 'p', 'c', 'p', 0x00, 0x00, 0x00 };
 	char buf[100];
@@ -730,8 +721,7 @@ error_recept(int fd, int err_code)
 }
 
 /* received a cancel command */
-static int
-cancel_recept(P_CBTD_INFO p_info, int fd)
+static int cancel_recept(P_CBTD_INFO p_info, int fd)
 {
 	/* In case of CL-700, need to transmit a "mo" command */
 #ifdef USE_MOTOROFF
@@ -747,10 +737,10 @@ cancel_recept(P_CBTD_INFO p_info, int fd)
 	for (i = 0; i < 100; i++)
 	{
 		if (is_sysflags(p_info, ST_JOB_PRINTING))
-			Sleep(1);
+			usleep (10000);
 	}
 
-	Sleep(1);
+	Sleep(1000);
 
 	point = strstr(p_info->prt_status, "ER:");
 	if (point && (memcmp(point, "ER:04", 5) == 0)) /* paper jam ? */
@@ -775,6 +765,7 @@ cancel_recept(P_CBTD_INFO p_info, int fd)
 			sizeof(reset_command), rbuf, &rsize);
 	}
 
+	/* todo: it use cups cmd here */
 	//	Cancel CUPS Jobs
 	system("cancel -a");
 
@@ -786,8 +777,7 @@ cancel_recept(P_CBTD_INFO p_info, int fd)
 
 
 /* received a cancel command (not D4) */
-static int
-cancel_nd4_recept(P_CBTD_INFO p_info, int fd)
+static int cancel_nd4_recept(P_CBTD_INFO p_info, int fd)
 {
 	set_sysflags(p_info, ST_JOB_CANCEL_NO_D4);
 	set_sysflags(p_info, ST_JOB_CANCEL);
@@ -796,8 +786,7 @@ cancel_nd4_recept(P_CBTD_INFO p_info, int fd)
 }
 
 /* received a nozzle check command */
-static int
-nozzlecheck_recept(P_CBTD_INFO p_info, int fd)
+static int nozzlecheck_recept(P_CBTD_INFO p_info, int fd)
 {
 
 	char buffer[256];
@@ -812,8 +801,7 @@ nozzlecheck_recept(P_CBTD_INFO p_info, int fd)
 }
 
 /* received a head cleaning command */
-static int
-headcleaning_recept(P_CBTD_INFO p_info, int fd)
+static int headcleaning_recept(P_CBTD_INFO p_info, int fd)
 {
 
 	char buffer[256];
@@ -828,8 +816,7 @@ headcleaning_recept(P_CBTD_INFO p_info, int fd)
 }
 
 /* received a get device_id command */
-static int
-getdeviceid_recept(P_CBTD_INFO p_info, int fd)
+static int getdeviceid_recept(P_CBTD_INFO p_info, int fd)
 {
 	char device_id[256];
 	/* todo: can't get device id here */
@@ -841,8 +828,7 @@ getdeviceid_recept(P_CBTD_INFO p_info, int fd)
 }
 
 /* receive a status acquisition command */
-static int
-status_recept(P_CBTD_INFO p_info, int fd)
+static int status_recept(P_CBTD_INFO p_info, int fd)
 {
 	if (p_info->prt_status_len == 0)
 		return 1;
@@ -852,11 +838,8 @@ status_recept(P_CBTD_INFO p_info, int fd)
 }
 
 
-
-
 /* usual command reception */
-static int
-default_recept(P_CBTD_INFO p_info, int fd, char* cbuf, int csize)
+static int default_recept(P_CBTD_INFO p_info, int fd, char* cbuf, int csize)
 {
 	char rbuf[REP_BUF_SIZE];
 	int rsize;
@@ -874,8 +857,7 @@ default_recept(P_CBTD_INFO p_info, int fd, char* cbuf, int csize)
 }
 
 /* take out data division minute from packet */
-static int
-command_recv(int fd, char* cbuf, int* csize)
+static int command_recv(int fd, char* cbuf, int* csize)
 {
 
 	if (sock_read(fd, cbuf, PAC_HEADER_SIZE))
@@ -892,12 +874,8 @@ command_recv(int fd, char* cbuf, int* csize)
 }
 
 
-
-
-
 /* handle the data which received */
-static int
-comserv_work(P_CBTD_INFO p_info, int fd)
+static int comserv_work(P_CBTD_INFO p_info, int fd)
 {
 	const char status_command[] = { 's', 't', 0x01, 0x00, 0x01 };
 	const char cancel_command[] = { 'c', 'a', 'n', 'c', 'e', 'l' };
@@ -982,8 +960,7 @@ comserv_work(P_CBTD_INFO p_info, int fd)
 
 
 /* end of thread */
-static void
-comserv_cleanup(void* data)
+static void comserv_cleanup(void* data)
 {
 	P_CARGS p_cargs = (P_CARGS)data;
 	int fd;
@@ -1093,7 +1070,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 					nclient ++;
 					set_sysflags (p_info, ST_CLIENT_CONNECT);
 					if (!is_sysflags (p_info, ST_PRT_CONNECT))
-						Sleep (1);
+						Sleep (1000);
 				}
 
 				else
