@@ -46,8 +46,7 @@
 static int _datatrans_lpr_flag;
 
 /* restart lpd */
-static void
-lpd_start(P_CBTD_INFO p_info)
+static void lpd_start(P_CBTD_INFO p_info)
 {
 	if (_datatrans_lpr_flag)
 	{
@@ -70,8 +69,7 @@ lpd_start(P_CBTD_INFO p_info)
 
 /* eliminate print job in process with lpd and turn a printer into
 temporary halt */
-static void
-lpd_stop(P_CBTD_INFO p_info)
+static void lpd_stop(P_CBTD_INFO p_info)
 {
 /*
 	/* In case of printer that a D4 command is not supported, wait
@@ -111,8 +109,7 @@ lpd_stop(P_CBTD_INFO p_info)
 
 
 /* open the named pipe */
-static int
-fifo_open(P_CBTD_INFO p_info, char* path)
+static int fifo_open(P_CBTD_INFO p_info, char* path)
 {
 /*	int fd;
 	int old_mask;
@@ -153,8 +150,7 @@ fifo_open(P_CBTD_INFO p_info, char* path)
 }
 
 /*  end of thread */
-static void
-datatrans_cleanup(void* data)
+static void datatrans_cleanup(void* data)
 {
 	P_CARGS p_cargs = (P_CARGS)data;
 	int fd = *(p_cargs->p_max);
@@ -169,8 +165,7 @@ datatrans_cleanup(void* data)
 }
 
 /* Send and receive of printing data */
-static void
-datatrans_work(P_CBTD_INFO p_info, int fd)
+static void datatrans_work(P_CBTD_INFO p_info, int fd)
 {
 	char *data_buf;
 	int read_size, write_size;
@@ -242,8 +237,7 @@ CANCEL:
 
 
 /* Thread to send printing data */
-void
-datatrans_thread(P_CBTD_INFO p_info)
+void datatrans_thread(P_CBTD_INFO p_info)
 {
 	int fifo_fd;
 	char* fifo_path = p_info->infifo_path;
