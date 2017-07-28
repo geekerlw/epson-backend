@@ -30,7 +30,8 @@
 #ifndef __EPSON_THREAD_H__
 #define __EPSON_THREAD_H__
 
-#include <WinSock2.h>
+//#include <WinSock2.h>
+#include <Windows.h>
 #include "epson-def.h"
 #include "epson-typedefs.h"
 #include "epson-daemon.h"

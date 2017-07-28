@@ -33,6 +33,12 @@
     <ClCompile Include="epson-wrapper.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="epson-hw.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="epson-command.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="epson-thread.h">
@@ -48,6 +54,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="epson-wrapper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="epson-hw.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="epson-local.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
