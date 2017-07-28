@@ -219,7 +219,7 @@ int is_sysflags(P_CBTD_INFO p_info, int flags)
 	return p_info->sysflags & flags;
 }
 
-static int gettimeofday(struct timeval *tp, void *tzp)
+int gettimeofday(struct timeval *tp, void *tzp)
 {
 	time_t clock;
 	struct tm tm;

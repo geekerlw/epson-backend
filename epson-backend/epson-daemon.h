@@ -98,5 +98,4 @@ int parameter_update(P_CBTD_INFO);
 void datatrans_thread(P_CBTD_INFO);
 void comserv_thread(P_CBTD_INFO);
 
-
 #endif /* __CBTD_H__ */

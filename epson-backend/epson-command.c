@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "epson-def.h"
 #include "epson-typedefs.h"
+#include "epson-daemon.h"
 
 static const EPS_UINT8 ExitPacketMode[] = {
 	0x00, 0x00, 0x00, 0x1B, 0x01, 0x40, 0x45, 0x4A, 0x4C, 0x20,
@@ -94,7 +97,7 @@ void* memRealloc(
 
 ) {
 	/* Create a temporary pointer to a new buffer of the desired size */
-	void* newBuffer = malloc(newSize);
+	void* newBuffer = (void*)malloc(newSize);
 	if (NULL == newBuffer) {
 		free(buffer);
 		return NULL;
@@ -477,3 +480,4 @@ epsMakeMainteCmd_END:
 	return(retStatus);
 
 }
+
