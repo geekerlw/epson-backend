@@ -23,12 +23,9 @@
 * the GNU General Public License in all respects for all of the
 * code used other then `cbt'.
 */
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
 
-#ifndef __CBTD_DEF_H__
-#define __CBTD_DEF_H__
+#ifndef __EPSON_DEF_H__
+#define __EPSON_DEF_H__
 
 /* printer access wait time */
 #define PRINTER_ACCESS_WAIT 120000
@@ -55,4 +52,4 @@
 #define _DEBUG_MESSAGE_VAL(x, y)
 #endif
 
-#endif /* __CBTD_DEF_H__ */
+#endif /* __EPSON_DEF_H__ */

@@ -17,8 +17,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef EPSON_TYPEDEFS_H_
-#define EPSON_TYPEDEFS_H_
+#ifndef __EPSON_TYPEDEFS_H__
+#define __EPSON_TYPEDEFS_H__
 
 typedef void* HANDLE;
 
@@ -131,6 +131,6 @@ typedef enum
   STS_DEFAULT
 }DAEMON_STS;
 
-#endif /* for EPSON_TYPEDEFS_H_ */        
+#endif /* __EPSON_TYPEDEFS_H__ */        
 
 

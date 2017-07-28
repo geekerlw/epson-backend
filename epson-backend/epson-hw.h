@@ -23,8 +23,8 @@
 *                                 ECBTEG.H
 *
 \******************************************************************************/
-#ifndef __ECBTEG_H
-#define __ECBTEG_H
+#ifndef __EPSON_HW_H__
+#define __EPSON_HW_H__
 
 #include <Windows.h>
 //#include "daemon_osdef.h"
@@ -134,4 +134,4 @@ int ECBT_Write(HANDLE hECBT, BYTE SID, LPBYTE lpBuffer, LPINT lpSize);
 int ECBT_Read(HANDLE hECBT, BYTE SID, LPBYTE lpBuffer, LPINT lpSize);
 
 
-#endif			//  __ECBTEG_H
+#endif /* __EPSON_HW_H__ */

@@ -23,9 +23,6 @@
 * the GNU General Public License in all respects for all of the
 * code used other then `cbt'.
 */
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
 
 #ifndef __EPSON_THREAD_H__
 #define __EPSON_THREAD_H__

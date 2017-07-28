@@ -17,8 +17,8 @@
 * along with this program; if not, write to the Free Software
 * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-#ifndef __CBTD_WRAPPER_H__
-#define __CBTD_WRAPPER_H__
+#ifndef __EPSON_WRAPPER_H__
+#define __EPSON_WRAPPER_H__
 
 #define SID_CTRL 0x02		/* control channel */
 #define SID_DATA 0x40		/* data channel */
@@ -34,4 +34,4 @@ int close_port_channel(P_CBTD_INFO, char);
 int write_to_prt(P_CBTD_INFO, char, char*, int*);
 int read_from_prt(P_CBTD_INFO, char, char*, int*);
 
-#endif /* __CBTD_WRAPPER_H__ */
+#endif /* __EPSON_WRAPPER_H__ */

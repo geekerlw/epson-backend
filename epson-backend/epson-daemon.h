@@ -23,12 +23,8 @@
 * the GNU General Public License in all respects for all of the
 * code used other then `cbt'.
 */
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
-
-#ifndef __CBTD_H__
-#define __CBTD_H__
+#ifndef __EPSON_DAEMON_H__
+#define __EPSON_DAEMON_H__
 
 #ifndef _DEBUG
 #define NOEBUG
@@ -98,4 +94,4 @@ int parameter_update(P_CBTD_INFO);
 void datatrans_thread(P_CBTD_INFO);
 void comserv_thread(P_CBTD_INFO);
 
-#endif /* __CBTD_H__ */
+#endif /* __EPSON_DAEMON_H__ */

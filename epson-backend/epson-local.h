@@ -23,8 +23,8 @@
 *                                 ECBT_LCL.H (Local.h)
 *
 \******************************************************************************/
-#ifndef __ECBTLCL_H
-#define __ECBTLCL_H
+#ifndef __EPSON_LOCAL_H__
+#define __EPSON_LOCAL_H__
 
 #include <Windows.h>
 //#include "epson-typedefs.h"
@@ -242,4 +242,4 @@ int	Read_Fnc2(LPPORT pPort, LPBYTE lpBuffer, int Size, LPINT lpRead);
 VOID	DummyRead_Fnc(LPPORT pPort);
 
 
-#endif			//  __ECBTLCL_H
+#endif	/* __EPSON_LOCAL_H__ */
