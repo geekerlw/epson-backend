@@ -36,8 +36,10 @@
 #include <WinSock2.h>
 #include <Windows.h>
 
+#ifndef _CRT_NO_TIME_T
 #define HAVE_STRUCT_TIMESPEC
 #include <pthread.h>
+#endif
 
 #include <sys/types.h>
 
@@ -55,25 +57,6 @@ typedef struct _SEM_OBJECT
 	pthread_cond_t cond;
 	int status_flag;
 } SEM_OBJECT, *P_SEM_OBJECT;
-
-static int gettimeofday(struct timeval *tp, void *tzp)
-{
-	time_t clock;
-	struct tm tm;
-	SYSTEMTIME wtm;
-	GetLocalTime(&wtm);
-	tm.tm_year = wtm.wYear - 1900;
-	tm.tm_mon = wtm.wMonth - 1;
-	tm.tm_mday = wtm.wDay;
-	tm.tm_hour = wtm.wHour;
-	tm.tm_min = wtm.wMinute;
-	tm.tm_sec = wtm.wSecond;
-	tm.tm_isdst = -1;
-	clock = mktime(&tm);
-	tp->tv_sec = (long)clock;
-	tp->tv_usec = wtm.wMilliseconds * 1000;
-	return (0);
-}
 
 /* Make thread and start it */
 void* init_thread(int stack_size, void* function, void* param)
@@ -234,6 +217,25 @@ void reset_sysflags(P_CBTD_INFO p_info, int flags)
 int is_sysflags(P_CBTD_INFO p_info, int flags)
 {
 	return p_info->sysflags & flags;
+}
+
+static int gettimeofday(struct timeval *tp, void *tzp)
+{
+	time_t clock;
+	struct tm tm;
+	SYSTEMTIME wtm;
+	GetLocalTime(&wtm);
+	tm.tm_year = wtm.wYear - 1900;
+	tm.tm_mon = wtm.wMonth - 1;
+	tm.tm_mday = wtm.wDay;
+	tm.tm_hour = wtm.wHour;
+	tm.tm_min = wtm.wMinute;
+	tm.tm_sec = wtm.wSecond;
+	tm.tm_isdst = -1;
+	clock = mktime(&tm);
+	tp->tv_sec = (long)clock;
+	tp->tv_usec = wtm.wMilliseconds * 1000;
+	return (0);
 }
 
 /* Wait till flag of system state is changed
