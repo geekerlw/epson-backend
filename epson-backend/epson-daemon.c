@@ -80,7 +80,6 @@ void usleep(__int64 usec)
     CloseHandle(timer); 
 }
 
-//根据通用串行口GUID查找打印机设备名，并输出打印机设备名
 bool OpenDevice(LPGUID pGuid, char *outNameBuf, DWORD index)
 {
 	HDEVINFO   hardwareDeviceInfo;
@@ -131,15 +130,13 @@ bool OpenDevice(LPGUID pGuid, char *outNameBuf, DWORD index)
  * todo: open /dev/usb/lp0 in linux
  * not the same with linux , maybe libusb is a
  * good way to do this
- * 所有操作应该转移到 epson-setup.c里面去做
  */
 static int prt_connect(P_CBTD_INFO p_info)
 {
-	int *fd = &p_info->devfd;
-	char devname[100] = "";
-	GUID keyid = { 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 };
-	//GUID keyid = { 0x28d78fad, 0x5a12, 0x11d1, 0xae, 0x5b, 0x00, 0x00, 0xf8, 0x03, 0xa8, 0xc2 };
 	HANDLE PrinterKey = NULL;
+	char devname[100] = "";
+	//GUID keyid = { 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 };
+	GUID keyid = { 0x28d78fad, 0x5a12, 0x11d1, 0xae, 0x5b, 0x00, 0x00, 0xf8, 0x03, 0xa8, 0xc2 };
 	OVERLAPPED m_ov;
 	m_ov.Offset = 0;
 	m_ov.OffsetHigh = 0;
@@ -150,20 +147,22 @@ static int prt_connect(P_CBTD_INFO p_info)
 
 	memset(&m_ov, 0, sizeof(m_ov));
 	m_ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	bool result = OpenDevice(&keyid, devname, 0);//通过GUID查找是否存在USB打印机,然后建立通信端口
+	bool result = OpenDevice(&keyid, devname, 0);
 
 	printf("devname is %s\n", devname);
 
-	PrinterKey = CreateFile((LPCWSTR)devname, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
-		FILE_ATTRIBUTE_NORMAL, NULL);
+	PrinterKey = CreateFile((LPCSTR)devname, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
+		(DWORD)NULL, NULL);
 	if (PrinterKey == INVALID_HANDLE_VALUE)
 	{
 		printf("PrinterKey  is invalid\n");
 		return -2;
 	}
 
-	*fd = (int)PrinterKey;
-	return *fd;
+	if (PrinterKey != NULL)
+		p_info->devfd = (int)PrinterKey;
+
+	return 0;
 }
 
 /* initialize CBT */
@@ -207,12 +206,12 @@ static void init_cbtd(P_CBTD_INFO p_info)
 
 	p_info->datatrans_thread_status = THREAD_RUN;
 	p_info->comserv_thread_status = THREAD_RUN;
-/*
+
 	p_info->datatrans_thread
 		= init_thread(CBTD_THREAD_STACK_SIZE,
 		(void *)datatrans_thread,
 			(void *)p_info);
-*/
+
 	p_info->comserv_thread
 		= init_thread(CBTD_THREAD_STACK_SIZE,
 		(void *)comserv_thread,
@@ -250,7 +249,7 @@ static void cbtd_control(void)
 	int set_flags, reset_flags;
 
 	init_cbtd(&info);
-	sig_set();
+	//sig_set();
 
 	while (!is_sysflags(&info, ST_SYS_DOWN))
 	{
@@ -299,7 +298,7 @@ static void cbtd_control(void)
 		{
 			/* fixme: devfd maybe a HANDLE, so I use CloseHandle instead */
 			//close(info.devfd);
-			CloseHandle(&info.devfd);
+			CloseHandle((HANDLE)info.devfd);
 			_DEBUG_MESSAGE("deconnect printer\n");
 			info.devfd = -1;
 

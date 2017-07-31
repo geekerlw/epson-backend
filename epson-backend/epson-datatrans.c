@@ -235,7 +235,6 @@ CANCEL:
 	return;
 }
 
-
 /* Thread to send printing data */
 void datatrans_thread(P_CBTD_INFO p_info)
 {

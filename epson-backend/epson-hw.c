@@ -34,6 +34,7 @@
 *       ECBT_Read()
 *
 */
+#include <stdio.h>
 #include <string.h>
 
 #include "epson-hw.h"
@@ -2245,7 +2246,7 @@ int Write_Fnc(LPPORT pPort, LPBYTE lpBuffer, int Size, LPINT lpWritten)
 
 	EnterCriticalSection(pPort->lpCsPort);
 
-	fRet = WriteFile(pPort->hOpen, lpBuffer, Size, (LPDWORD)lpWritten, (LPOVERLAPPED)NULL);
+	fRet = WriteFile((pPort->hOpen), lpBuffer, Size, (LPDWORD)lpWritten, (LPOVERLAPPED)NULL);
 
 	if (fRet) {
 		if (*lpWritten == Size) {
@@ -2257,8 +2258,11 @@ int Write_Fnc(LPPORT pPort, LPBYTE lpBuffer, int Size, LPINT lpWritten)
 			fRet = CBT_ERR_TXIMPERFECT;
 		}
 	}
-	else
+	else{	
+		printf("debug: %d\n",GetLastError());
+		
 		fRet = CBT_ERR_WRITEERROR;
+	}
 
 	pPort->Pre_Reply = CBT_RPY_NONE;
 
