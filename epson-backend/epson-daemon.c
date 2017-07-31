@@ -51,13 +51,17 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <Windows.h>
+#include <SetupAPI.h>
 #include "epson-def.h"
 #include "epson-typedefs.h"
 #include "epson-daemon.h"
 #include "epson-thread.h"
 #include "epson-wrapper.h"
+
+#pragma comment(lib,"setupapi.lib")
 
 //int pid_fd = -1;
 
@@ -76,6 +80,52 @@ void usleep(__int64 usec)
     CloseHandle(timer); 
 }
 
+//根据通用串行口GUID查找打印机设备名，并输出打印机设备名
+bool OpenDevice(LPGUID pGuid, char *outNameBuf, DWORD index)
+{
+	HDEVINFO   hardwareDeviceInfo;
+	SP_INTERFACE_DEVICE_DATA   deviceInfoData;
+	hardwareDeviceInfo = SetupDiGetClassDevs(pGuid, NULL, NULL, (DIGCF_PRESENT | DIGCF_INTERFACEDEVICE));
+	deviceInfoData.cbSize = sizeof(SP_INTERFACE_DEVICE_DATA);
+
+	if (!SetupDiEnumDeviceInterfaces(hardwareDeviceInfo, 0, pGuid, index, &deviceInfoData))
+	{
+		DWORD   reErr = GetLastError();
+		printf("reErr code  is %d\n", reErr);
+		return false;
+	}
+	//printf("InterfaceClassGuid code  is %d, cbSize is %d\n", deviceInfoData.InterfaceClassGuid, deviceInfoData.cbSize);
+
+	PSP_INTERFACE_DEVICE_DETAIL_DATA   functionClassDeviceData = NULL;
+	ULONG   predictedLength = 0;
+	ULONG   requiredLength = 0;
+
+	//   allocate   a   function   class   device   data   structure   to   receive   the   goods   about   this   particular   device. 
+	SetupDiGetInterfaceDeviceDetail(hardwareDeviceInfo, &deviceInfoData, NULL, 0, &requiredLength, NULL);
+	predictedLength = requiredLength;
+	//   sizeof   (SP_FNCLASS_DEVICE_DATA)   +   512; 
+
+	functionClassDeviceData = (PSP_INTERFACE_DEVICE_DETAIL_DATA)malloc(predictedLength);
+	functionClassDeviceData->cbSize = sizeof(SP_INTERFACE_DEVICE_DETAIL_DATA);
+
+	//   Retrieve   the   information   from   Plug   and   Play. 
+	if (!SetupDiGetInterfaceDeviceDetail(hardwareDeviceInfo, &deviceInfoData, functionClassDeviceData, predictedLength,
+		&requiredLength, NULL))
+	{
+		free(functionClassDeviceData);
+		return   false;
+	}
+
+	strcpy(outNameBuf, (char*)functionClassDeviceData->DevicePath);
+
+	free(functionClassDeviceData);
+
+	DWORD   reErr = GetLastError();
+	SetupDiDestroyDeviceInfoList(hardwareDeviceInfo);
+	return   true;
+}
+
+
 /* connect a printer */
 /*
  * todo: open /dev/usb/lp0 in linux
@@ -85,7 +135,35 @@ void usleep(__int64 usec)
  */
 static int prt_connect(P_CBTD_INFO p_info)
 {
-	return 0;
+	int *fd = &p_info->devfd;
+	char devname[100] = "";
+	GUID keyid = { 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 };
+	//GUID keyid = { 0x28d78fad, 0x5a12, 0x11d1, 0xae, 0x5b, 0x00, 0x00, 0xf8, 0x03, 0xa8, 0xc2 };
+	HANDLE PrinterKey = NULL;
+	OVERLAPPED m_ov;
+	m_ov.Offset = 0;
+	m_ov.OffsetHigh = 0;
+	m_ov.hEvent = NULL;
+
+	if (is_sysflags(p_info, ST_SYS_DOWN))
+		return -1;
+
+	memset(&m_ov, 0, sizeof(m_ov));
+	m_ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	bool result = OpenDevice(&keyid, devname, 0);//通过GUID查找是否存在USB打印机,然后建立通信端口
+
+	printf("devname is %s\n", devname);
+
+	PrinterKey = CreateFile((LPCWSTR)devname, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL, NULL);
+	if (PrinterKey == INVALID_HANDLE_VALUE)
+	{
+		printf("PrinterKey  is invalid\n");
+		return -2;
+	}
+
+	*fd = (int)PrinterKey;
+	return *fd;
 }
 
 /* initialize CBT */
