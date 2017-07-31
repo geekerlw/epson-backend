@@ -129,12 +129,12 @@ static void init_cbtd(P_CBTD_INFO p_info)
 
 	p_info->datatrans_thread_status = THREAD_RUN;
 	p_info->comserv_thread_status = THREAD_RUN;
-
+/*
 	p_info->datatrans_thread
 		= init_thread(CBTD_THREAD_STACK_SIZE,
 		(void *)datatrans_thread,
 			(void *)p_info);
-
+*/
 	p_info->comserv_thread
 		= init_thread(CBTD_THREAD_STACK_SIZE,
 		(void *)comserv_thread,

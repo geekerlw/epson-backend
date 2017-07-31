@@ -560,14 +560,20 @@ static int post_prt_status(P_CBTD_INFO p_info)
 /* open a socket */
 static int servsock_open(int port)
 {
-	/* fixme: maybe when we use socket on windows, 
-	 * we need to start up WSA first and close WSA
-	 * when use end. the function is WSAStartup
-	 */
+	WSADATA wsa;     
 	int fd;
 	int opt = 1;
 
 	struct sockaddr_in addr;
+
+	printf("Initialising Winsock...\n");
+    if (WSAStartup(MAKEWORD(2,2),&wsa) != 0)
+    {
+        printf("Failed. Error Code : %d",WSAGetLastError());
+        return 1;
+    }
+     
+    printf("Initialise success\n.");
 
 	/* 0 means IPPROTO_IP  dummy for IP */
 	fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -1100,7 +1106,8 @@ void comserv_thread(P_CBTD_INFO p_info)
 			}
 		}
 	}
-  
+
+	WSACleanup();
 	pthread_cleanup_pop (1);
 	return;
 }
