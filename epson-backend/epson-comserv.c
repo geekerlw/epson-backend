@@ -561,7 +561,7 @@ static int post_prt_status(P_CBTD_INFO p_info)
 static int servsock_open(int port)
 {
 	WSADATA wsa;     
-	int fd;
+	SOCKET fd;
 	int opt = 1;
 
 	struct sockaddr_in addr;
