@@ -241,7 +241,7 @@ void datatrans_thread(P_CBTD_INFO p_info)
 	int fifo_fd;
 	char* fifo_path = p_info->infifo_path;
 	CARGS cargs;
-	int set_flags, reset_flags;
+	//int set_flags, reset_flags;
 
 	//_DEBUG_MESSAGE_VAL("datatrans thread ID : ", (int)pthread_self());
 	_datatrans_lpr_flag = 0;
@@ -264,22 +264,22 @@ void datatrans_thread(P_CBTD_INFO p_info)
 			break;
 
 		p_info->datatrans_thread_status = THREAD_RUN;
-		set_sysflags(p_info, ST_JOB_PRINTING);
+		//set_sysflags(p_info, ST_JOB_PRINTING);
 
-		set_flags = 0;
-		reset_flags = ST_PRT_CONNECT | ST_SYS_DOWN | ST_JOB_CANCEL;
+		//set_flags = 0;
+		//reset_flags = ST_PRT_CONNECT | ST_SYS_DOWN | ST_JOB_CANCEL;
 
-		wait_sysflags(p_info, set_flags, reset_flags, 0, WAIT_SYS_AND);
+		//wait_sysflags(p_info, set_flags, reset_flags, 0, WAIT_SYS_AND);
 
-		if (is_sysflags(p_info, ST_PRT_CONNECT))
-		{
+		//if (is_sysflags(p_info, ST_PRT_CONNECT))
+		//{
 			/* send and receive of printing data */
 		/*	open_port_channel(p_info, SID_DATA);
 			datatrans_work(p_info, fifo_fd);
 			close_port_channel(p_info, SID_DATA);
 			*/
-		}
-		reset_sysflags(p_info, ST_JOB_PRINTING);
+		//}
+		//reset_sysflags(p_info, ST_JOB_PRINTING);
 
 		//if (fifo_fd)
 			//close(fifo_fd);
