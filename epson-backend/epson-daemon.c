@@ -133,10 +133,12 @@ bool OpenDevice(LPGUID pGuid, char *outNameBuf, DWORD index)
  */
 static int prt_connect(P_CBTD_INFO p_info)
 {
-	HANDLE PrinterKey = NULL;
+	int *PrinterKey = &p_info->devfd;
 	char devname[100] = "";
 	//GUID keyid = { 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 };
 	GUID keyid = { 0x28d78fad, 0x5a12, 0x11d1, 0xae, 0x5b, 0x00, 0x00, 0xf8, 0x03, 0xa8, 0xc2 };
+	//GUID keyid = { 0x4d36e979, 0xe325, 0x11ce, 0xbf, 0xc1, 0x80, 0x00, 0x2b, 0xe1, 0x03, 0x18 };
+	//GUID keyid = { 0x1ed2bbf9, 0x11f0, 0x4084, 0xb2, 0x1f, 0xad, 0x83, 0xa8, 0xe6, 0xdc, 0xdc };
 	OVERLAPPED m_ov;
 	m_ov.Offset = 0;
 	m_ov.OffsetHigh = 0;
@@ -151,16 +153,13 @@ static int prt_connect(P_CBTD_INFO p_info)
 
 	printf("devname is %s\n", devname);
 
-	PrinterKey = CreateFile((LPCSTR)devname, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
+	*PrinterKey = (int)CreateFile((LPCSTR)devname, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
 		(DWORD)NULL, NULL);
 	if (PrinterKey == INVALID_HANDLE_VALUE)
 	{
 		printf("PrinterKey  is invalid\n");
 		return -2;
 	}
-
-	if (PrinterKey != NULL)
-		p_info->devfd = (int)PrinterKey;
 
 	return 0;
 }
@@ -281,7 +280,7 @@ static void cbtd_control(void)
 			{
 				set_flags = ST_CLIENT_CONNECT | ST_JOB_PRINTING | ST_JOB_CANCEL;
 				reset_flags = 0;
-
+				
 				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_OR) == 0)
 					break;
 

@@ -260,7 +260,7 @@ int ECBT_Open(HANDLE hOpen, LPHANDLE lpHECBT)
 	ResetEvent(pPort->hRThread_Obj);
 	SetEvent(pPort->hRX_Obj);
 	pPort->hRThread = CreateThread(NULL, 0x4000, (LPTHREAD_START_ROUTINE)ReadThread,
-		(LPVOID)pPort, CREATE_SUSPENDED, &RT_ID);
+		(LPVOID)pPort, 0, &RT_ID);
 
 	/* confirm reception of Reply */
 	if (WAIT_TIMEOUT == WaitForSingleObject(pPort->hRPL_Obj, Timeout_Time)) {
@@ -2996,7 +2996,7 @@ void ReadThread(LPVOID param)
 	int         fRet;
 	int         cnt;            // Size of read data
 	WORD        length;         // Length of packet
-	BYTE        HD_BUFFER[16];  // Buffer for packet header
+	BYTE        HD_BUFFER[256];  // Buffer for packet header
 	int         BD_size;        // Data size in buffer
 	int         RD_size;        // Size to read
 	int         i;
@@ -3079,7 +3079,7 @@ void ReadThread(LPVOID param)
 			RD_size = EpsonPackingReply_Sz;     // 0x08
 			break;
 		default:
-			RD_size = 6;
+			RD_size = sizeof(HD_BUFFER);
 		}
 
 		// Synchronization of Read/Write - start
@@ -3098,7 +3098,7 @@ void ReadThread(LPVOID param)
 				RD_size = 0;
 			}
 		}
-		else {
+		else {		
 			fRet = Read_Fnc(pPort, HD_BUFFER, RD_size, &cnt);
 			BD_size = cnt;
 		}
@@ -3180,7 +3180,7 @@ void ReadThread(LPVOID param)
 
 			fRet = Check_CommandReply(pPort, pPort->CH0BUFFER);
 
-			if (fRet < 0)
+			if (fRet < 0) 
 				goto Read_End;
 
 			if (fRet == CBT_RCV_REPLY) {        // (0x02)

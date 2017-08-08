@@ -52,9 +52,8 @@ int open_port_driver(P_CBTD_INFO p_info)
 	enter_critical(p_info->ecbt_accsess_critical);
 
 	err = (int)ECBT_Open((HANDLE)p_info->devfd, &p_info->ecbt_handle);
-	if (err == 0)
-		err = (int)ECBT_OpenChannel(p_info->ecbt_handle, SID_CTRL);
-	//err = (int)ECBT_OpenChannel(p_info->ecbt_handle, SID_CTRL);
+	if (err == 0) 
+		err = (int)ECBT_OpenChannel(p_info->ecbt_handle, SID_CTRL);	
 
 	leave_critical(p_info->ecbt_accsess_critical);
 

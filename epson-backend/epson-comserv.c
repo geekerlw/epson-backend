@@ -598,7 +598,7 @@ static int sock_read(int fd, char* buf, int read_size)
 
 	for (i = 0; i < SOCK_ACCSESS_WAIT_MAX; i++)
 	{
-		size = recv(fd, buf, read_size, MSG_NOSIGNAL | MSG_DONTWAIT);
+		size = recv(fd, buf, read_size, 0);
 		if (size == read_size)
 		{
 			return 0;
@@ -626,7 +626,7 @@ static int sock_write(int fd, char* buf, int write_size)
 
 	for (i = 0; i < SOCK_ACCSESS_WAIT_MAX; i++)
 	{
-		size = send(fd, buf, write_size, MSG_NOSIGNAL | MSG_DONTWAIT);
+		size = send(fd, buf, write_size, 0);
 		if (size == write_size)
 		{
 			/* todo: windows has no fsync, maybe use fflush instead */
@@ -827,6 +827,7 @@ static int getdeviceid_recept(P_CBTD_INFO p_info, int fd)
 	char device_id[256];
 	/* todo: can't get device id here */
 	//get_device_id(device_id);
+	strcpy(device_id, "MFG:EPSON;CMD:ESCPL2,BDC,D4,D4PX;MDL:Epson Stylus Photo R330;CLS:PRINTER;DES:EPSON Epson Stylus Photo R330;CID:EpsonStd2;");
 
 	reply_send(fd, device_id, strlen(device_id));
 
@@ -895,7 +896,7 @@ static int comserv_work(P_CBTD_INFO p_info, int fd)
 	assert(p_info);
 
 	/* wait till it is connected to a printer */
-	if (!is_sysflags(p_info, ST_PRT_CONNECT))
+	if (!is_sysflags(p_info, ST_PRT_CONNECT)) 
 		return error_recept(fd, ERRPKT_PRINTER_NO_CONNECT);
 
 	if (command_recv(fd, cbuf, &csize))
@@ -1027,7 +1028,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 	for (;;)
 	{
 		int fd;
-		int addr_len;
+		int addr_len = sizeof(client_addr);
 		fd_set watch_fds = sock_fds;
 
 		tv.tv_sec = 2;
@@ -1090,7 +1091,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 						/* disconnecting */
 						_DEBUG_MESSAGE_VAL("deconnect client fd = ", fd);
 						shutdown (fd, 2);
-						FD_CLR (fd, &sock_fds);
+						FD_CLR (fd, &sock_fds);						
 
 						nclient--;
 						if (nclient == 0)

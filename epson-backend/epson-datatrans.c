@@ -274,13 +274,14 @@ void datatrans_thread(P_CBTD_INFO p_info)
 		if (is_sysflags(p_info, ST_PRT_CONNECT))
 		{
 			/* send and receive of printing data */
-			open_port_channel(p_info, SID_DATA);
+		/*	open_port_channel(p_info, SID_DATA);
 			datatrans_work(p_info, fifo_fd);
 			close_port_channel(p_info, SID_DATA);
+			*/
 		}
 		reset_sysflags(p_info, ST_JOB_PRINTING);
 
-		if (fifo_fd)
+		//if (fifo_fd)
 			//close(fifo_fd);
 
 		if (is_sysflags(p_info, ST_SYS_DOWN))
