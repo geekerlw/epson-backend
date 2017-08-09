@@ -259,6 +259,7 @@ static void cbtd_control(void)
 			reset_flags = ST_SYS_DOWN | ST_CLIENT_CONNECT | ST_JOB_PRINTING | ST_JOB_CANCEL;
 			if (wait_sysflags(&info, set_flags, reset_flags, 5, WAIT_SYS_AND) == 0)
 				break;
+			printf("first loop in daemon\n");
 
 			if (is_sysflags(&info, ST_DAEMON_WAKEUP))
 				reset_sysflags(&info, ST_DAEMON_WAKEUP);

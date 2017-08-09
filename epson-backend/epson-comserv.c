@@ -563,17 +563,13 @@ static int servsock_open(int port)
 	WSADATA wsa;     
 	SOCKET fd;
 	int opt = 1;
-
 	struct sockaddr_in addr;
 
-	printf("Initialising Winsock...\n");
     if (WSAStartup(MAKEWORD(2,2),&wsa) != 0)
     {
         printf("Failed. Error Code : %d",WSAGetLastError());
         return 1;
     }
-     
-    printf("Initialise success\n.");
 
 	/* 0 means IPPROTO_IP  dummy for IP */
 	fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -1048,6 +1044,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 		if (!is_sysflags (p_info, ST_PRT_CONNECT))
 		{
 			_comserv_first_flag = 1;
+			printf("first loop in comserv\n");
 		}
 		else
 		{
