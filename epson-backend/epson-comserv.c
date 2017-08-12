@@ -50,18 +50,10 @@ static const char COMMAND_PACKET_KEY[] = "pcp";
 #define PAC_HEADER_SIZE 5	/* size of packet header */
 #define REP_BUF_SIZE  256	/* maximum size of reply buffer */
 
-#define STATUS_POST_TIME 1 /* number of seconds which updates status */
-
 #define HIDE_INKINFO (0x01 << 0)
 #define HIDE_INKLOW  (0x01 << 1)
 
-#ifndef MSG_NOSIGNAL
-#define MSG_NOSIGNAL 0x2000
-#endif
-
-#ifndef MSG_DONTWAIT
-#define MSG_DONTWAIT 0x40
-#endif
+static int _comserv_first_flag;
 
 enum _ERROR_PACKET_NUMBERS {
 	ERRPKT_NOREPLY = 0,	/* no error (nothing reply) */
@@ -79,16 +71,11 @@ typedef enum {
 	STBIN_PC = 0x36
 } StField;
 
-/* When flag stands, get status from a printer without qualification */
-static int _comserv_first_flag;
-
 extern int gettimeofday(struct timeval *tp, void *tzp);
 extern EPS_ERR_CODE epsMakeMainteCmd(
-
 	EPS_INT32		cmd,
 	EPS_UINT8*		buffer,
 	EPS_UINT32*		buffersize
-
 );
 
 /* transmit a command to a printer and receive reply */
@@ -500,10 +487,10 @@ static int post_prt_status(P_CBTD_INFO p_info)
 			if (point[4] == '4')
 			{
 				reset_sysflags(p_info, ST_JOB_CANCEL);
-				reset_sysflags(p_info, ST_JOB_CANCEL_NO_D4);
 			}
 		}
 
+#if 0
 		/* wait for re-starting of a printer */
 		if (is_sysflags(p_info, ST_JOB_CANCEL_NO_D4))
 		{
@@ -523,7 +510,7 @@ static int post_prt_status(P_CBTD_INFO p_info)
 			}
 
 		}
-
+#endif /* if 0 */
 		p_info->status_post_time = now_time;
 #if 0      
 		/* set a clock */
@@ -781,7 +768,6 @@ static int cancel_recept(P_CBTD_INFO p_info, int fd)
 /* received a cancel command (not D4) */
 static int cancel_nd4_recept(P_CBTD_INFO p_info, int fd)
 {
-	set_sysflags(p_info, ST_JOB_CANCEL_NO_D4);
 	set_sysflags(p_info, ST_JOB_CANCEL);
 	error_recept(fd, ERRPKT_NOREPLY);
 	return 0;
@@ -892,7 +878,7 @@ static int comserv_work(P_CBTD_INFO p_info, int fd)
 	assert(p_info);
 
 	/* wait till it is connected to a printer */
-	if (!is_sysflags(p_info, ST_PRT_CONNECT)) 
+	if (!is_sysflags(p_info, ST_PRT_CONNECT))
 		return error_recept(fd, ERRPKT_PRINTER_NO_CONNECT);
 
 	if (command_recv(fd, cbuf, &csize))
@@ -1040,16 +1026,13 @@ void comserv_thread(P_CBTD_INFO p_info)
 		if (is_sysflags (p_info, ST_SYS_DOWN))
 			break;
 
-		/* Is a printer connected ? */
-		if (!is_sysflags (p_info, ST_PRT_CONNECT))
-		{
-			_comserv_first_flag = 1;
-			printf("first loop in comserv\n");
-		}
-		else
-		{
-			if (post_prt_status (p_info))
-				reset_sysflags (p_info, ST_PRT_CONNECT);
+		if (p_info->need_update == 1 && is_sysflags(p_info, ST_PRT_CONNECT)) {
+			if (post_prt_status(p_info)) {
+				reset_sysflags(p_info, ST_PRT_CONNECT);
+			}
+			else {
+				p_info->need_update = 0;
+			}
 		}
 
 		for (fd = 0; fd < maxval + 1; fd++)
@@ -1094,10 +1077,9 @@ void comserv_thread(P_CBTD_INFO p_info)
 						if (nclient == 0)
 							reset_sysflags (p_info, ST_CLIENT_CONNECT);
 					}
-					else
-					{
+					else {
 						/* receive a message */
-						if (comserv_work (p_info, fd))
+						if (comserv_work (p_info, fd))	
 							reset_sysflags (p_info, ST_PRT_CONNECT);
 					}
 				}

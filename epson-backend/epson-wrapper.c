@@ -119,7 +119,7 @@ int write_to_prt(P_CBTD_INFO p_info, char sid,
 	int count = 0;
 	int err = CBT_ERR_NORMAL;
 
-	_DEBUG_MESSAGE("In Write");
+	//_DEBUG_MESSAGE("In Write");
 	for (count = 0; count < ECBT_ACCSESS_WAIT_MAX; count++)
 	{
 		err = ECBT_Write(p_info->ecbt_handle, sid, (LPBYTE)buffer, p_size);
@@ -143,14 +143,14 @@ int write_to_prt(P_CBTD_INFO p_info, char sid,
 	if (err == CBT_ERR_CHNOTOPEN)
 		ECBT_OpenChannel(p_info->ecbt_handle, sid);
 
-	_DEBUG_MESSAGE_VAL("ECBT_Write size =", *p_size);
+	//_DEBUG_MESSAGE_VAL("ECBT_Write size =", *p_size);
 	if (err < 0 || *p_size == 0)
 	{
-		_DEBUG_MESSAGE_VAL("ECBT_Write Error code =", err);
+		//_DEBUG_MESSAGE_VAL("ECBT_Write Error code =", err);
 		return 1;
 	}
 
-	_DEBUG_MESSAGE("Out Write");
+	//_DEBUG_MESSAGE("Out Write");
 	return 0;
 }
 
@@ -161,7 +161,7 @@ int read_from_prt(P_CBTD_INFO p_info, char sid,
 	int count = 0;
 	int err = CBT_ERR_NORMAL;
 
-	_DEBUG_MESSAGE("In Read");
+	//_DEBUG_MESSAGE("In Read");
 
 	for (count = 0; count < ECBT_ACCSESS_WAIT_MAX; count++)
 	{
@@ -183,13 +183,13 @@ int read_from_prt(P_CBTD_INFO p_info, char sid,
 	if (err == CBT_ERR_CHNOTOPEN)
 		ECBT_OpenChannel(p_info->ecbt_handle, sid);
 
-	_DEBUG_MESSAGE_VAL("ECBT_Read size =", *p_size);
+	//_DEBUG_MESSAGE_VAL("ECBT_Read size =", *p_size);
 	if (err < 0 || *p_size == 0)
 	{
-		_DEBUG_MESSAGE_VAL("ECBT_Read Error code =", err);
+		//_DEBUG_MESSAGE_VAL("ECBT_Read Error code =", err);
 		return 1;
 	}
 
-	_DEBUG_MESSAGE("Out Read");
+	//_DEBUG_MESSAGE("Out Read");
 	return 0;
 }

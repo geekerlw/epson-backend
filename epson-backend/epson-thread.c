@@ -234,8 +234,10 @@ int gettimeofday(struct timeval *tp, void *tzp)
 
 /* Wait till flag of system state is changed
 * wait_type
-*      WAIT_SYS_OR : wait for even condition one if flags fill it
-*      WAIT_SYS_AND : wait if flags satisfy every condition
+*      WAIT_SYS_OR : wait for even condition one if flags fill it, set_flags may be 0
+*					 p_info->sys_flags has any one of reset_flags.
+*      WAIT_SYS_AND : wait if flags satisfy every condition, set_flags must exist
+*					 p_info->sys_flags has all of reset_flags and no set_flags.					
 *
 * returns zero on success, or 1 if an timeout.
 */
@@ -251,13 +253,13 @@ int wait_sysflags(P_CBTD_INFO p_info, int set_flags,
 	err += pthread_mutex_lock(&p_semobj->mutex);
 	for (;;)
 	{
-		if (wait_type == WAIT_SYS_OR)
+		if (wait_type == WAIT_SYS_AND)
 		{
 			if (is_sysflags(p_info, set_flags) == 0
 				&& is_sysflags(p_info, reset_flags) == reset_flags)
 				break;
 		}
-		else if (wait_type == WAIT_SYS_AND)
+		else if (wait_type == WAIT_SYS_OR)
 		{
 			if (is_sysflags(p_info, set_flags) != set_flags
 				|| is_sysflags(p_info, reset_flags) != 0)

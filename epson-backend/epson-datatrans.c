@@ -25,128 +25,179 @@
 */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <io.h>
-#include <fcntl.h>
-#include "epson-daemon.h"
-#include "epson-wrapper.h"
-#include "epson-thread.h"
+#include <assert.h>
+#include <tchar.h>
+#include <Windows.h>
 
 #ifndef _CRT_NO_TIME_T
 #define HAVE_STRUCT_TIMESPEC
 #include <pthread.h>
 #endif
 
-#define F_OK 0 /* Test for existence. just for windows*/
+#include "epson-daemon.h"
+#include "epson-thread.h"
 
-#define DATA_BUF_SIZE 0x1000	/* size of data which can read at a time */
-#define INPUT_TIMEOUT 60	/* timeout of input */
 
 static int _datatrans_lpr_flag;
 
-/* restart lpd */
-static void lpd_start(P_CBTD_INFO p_info)
-{
-	if (_datatrans_lpr_flag)
-	{
-		char* com_buf;
 
-		/* command + printer name + \0 */
-		com_buf = malloc(10 + strlen(p_info->printer_name) + 1);
-
-		/* printing start */
-		strcpy(com_buf, "lpc start ");
-		strcat(com_buf, p_info->printer_name);
-		system(com_buf);
-
-		free(com_buf);
-		_datatrans_lpr_flag = 0;
-	}
-
-	return;
-}
-
-/* eliminate print job in process with lpd and turn a printer into
-temporary halt */
-static void lpd_stop(P_CBTD_INFO p_info)
-{
 /*
-	/* In case of printer that a D4 command is not supported, wait
-	till a printer reset it */
-/*	if (is_sysflags(p_info, ST_JOB_CANCEL_NO_D4))
-	{
-		reset_sysflags(p_info, ST_JOB_PRINTING);
-		wait_sysflags(p_info, ST_JOB_CANCEL, 0, 0, WAIT_SYS_AND);
-	}
-/* todo: windows can't write file*/
-/*	if (!access("/var/run/lpr_lock", F_OK))
-	{
-		char* com_buf;
-
-		/* command + printer name + \0 */
-/*		com_buf = malloc(10 + strlen(p_info->printer_name) + 1);
-
-		/* printing stop */
-/*		strcpy(com_buf, "lpc stop ");
-		strcat(com_buf, p_info->printer_name);
-		system(com_buf);
-
-		/* delete Job */
-/*		strcpy(com_buf, "lprm -P");
-		strcat(com_buf, p_info->printer_name);
-		system(com_buf);
-
-		free(com_buf);
-		/* lpr stops */
-/*		_datatrans_lpr_flag = 1;
-	}
-
-	return;
-*/
-}
-
-
-
-/* open the named pipe */
-static int fifo_open(P_CBTD_INFO p_info, char* path)
+ * get printer job status, success return true 
+ */
+static BOOL GetJobs(HANDLE hPrinter, JOB_INFO_2 **ppJobInfo, int *pcJobs, DWORD *pStatus)
 {
-/*	int fd;
-	int old_mask;
+	DWORD			cByteNeeded, nReturned, cByteUsed;
+	JOB_INFO_2		*pJobStorage = NULL;
+	PRINTER_INFO_2	*pPrinterInfo = NULL;
 
-	if (access(path, F_OK) == 0)
-	{
-		if (remove(path))
-		{
-			return -1;
+	/* Get the buffer size needed. */
+	if (!GetPrinter(hPrinter, 2, NULL, 0, &cByteNeeded)) {
+		if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+			return FALSE;
+	}
+
+	pPrinterInfo = (PRINTER_INFO_2 *)malloc(cByteNeeded);
+	if (!(pPrinterInfo))
+		/* Failure to allocate memory. */
+		return FALSE;
+
+	/* Get the printer information. */
+	if (!GetPrinter(hPrinter, 2, (LPSTR)pPrinterInfo, cByteNeeded, &cByteUsed)) {
+		/* Failure to access the printer. */
+		free(pPrinterInfo);
+		pPrinterInfo = NULL;
+		return FALSE;
+	}
+
+	/* Get job storage space. */
+	if (!EnumJobs(hPrinter, 0, pPrinterInfo->cJobs, 2, NULL, 0, (LPDWORD)&cByteNeeded, (LPDWORD)&nReturned)) {
+		if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
+			free(pPrinterInfo);
+			pPrinterInfo = NULL;
+			return FALSE;
 		}
 	}
 
-	old_mask = umask(0);
-
-	if (mkfifo(path, 0666))
-	{
-		umask(old_mask);
-		return -1;
+	pJobStorage = (JOB_INFO_2 *)malloc(cByteNeeded);
+	if (!pJobStorage) {
+		/* Failure to allocate Job storage space. */
+		free(pPrinterInfo);
+		pPrinterInfo = NULL;
+		return FALSE;
 	}
 
-	umask(old_mask);
+	ZeroMemory(pJobStorage, cByteNeeded);
 
-	if (is_sysflags(p_info, ST_JOB_CANCEL | ST_JOB_CANCEL_NO_D4))
-	{
-		wait_sysflags(p_info, ST_JOB_CANCEL | ST_JOB_CANCEL_NO_D4, 0, 0, WAIT_SYS_AND);
+	/* Get the list of jobs. */
+	if (!EnumJobs(hPrinter, 0, pPrinterInfo->cJobs, 2, (LPBYTE)pJobStorage, cByteNeeded, (LPDWORD)&cByteUsed, (LPDWORD)&nReturned)) {
+		free(pPrinterInfo);
+		free(pJobStorage);
+		pJobStorage = NULL;
+		pPrinterInfo = NULL;
+		return FALSE;
 	}
-	/* wait till there is input */
-/*	lpd_start(p_info);
-	fd = open(path, O_RDONLY);
 
-	if (fd < 0)
-	{
-		return -1;
+	/*
+	 *  Return the information.
+	 */
+	*pcJobs = nReturned;
+	*pStatus = pPrinterInfo->Status;
+	*ppJobInfo = pJobStorage;
+	free(pPrinterInfo);
+
+	return TRUE;
+}
+
+/*
+ * return Printer error and job error,
+ * any error of printer or job return ture
+ */
+static BOOL IsPrinterError(HANDLE hPrinter, DWORD *dwPrinterStatus, DWORD *jobStatus, DWORD *cJobs)
+{
+	JOB_INFO_2	*pJobs;
+	/*
+	 *  Get the state information for the Printer Queue and
+	 *  the jobs in the Printer Queue.
+	 */
+	if (!GetJobs(hPrinter, &pJobs, cJobs, dwPrinterStatus))
+		return FALSE;
+
+	/*
+	 *  If the Printer reports an error, believe it.
+	 */
+	if (*dwPrinterStatus & (PRINTER_STATUS_ERROR |
+			PRINTER_STATUS_PAPER_JAM |
+			PRINTER_STATUS_PAPER_OUT |
+			PRINTER_STATUS_PAPER_PROBLEM |
+			PRINTER_STATUS_OUTPUT_BIN_FULL |
+			PRINTER_STATUS_NOT_AVAILABLE |
+			PRINTER_STATUS_NO_TONER |
+			PRINTER_STATUS_OUT_OF_MEMORY |
+			PRINTER_STATUS_OFFLINE |
+			PRINTER_STATUS_DOOR_OPEN)) {
+		goto error;
 	}
-	return fd;
-*/
-	return 0;
+
+	/*
+	 *  Find the Job in the Queue that is printing.
+	 */
+	for (int i = 0; i < (int)*cJobs; i++) {
+		if (pJobs[i].Status & JOB_STATUS_PRINTING) {
+			/*
+			*  If the job is in an error state,
+			*  report an error for the printer.
+			*  Code could be inserted here to
+			*  attempt an interpretation of the
+			*  pStatus member as well.
+			*/
+			if (pJobs[i].Status & (JOB_STATUS_ERROR |
+					JOB_STATUS_OFFLINE |
+					JOB_STATUS_PAPEROUT |
+					JOB_STATUS_BLOCKED_DEVQ)) {
+				goto error;
+			}
+		}
+	}
+
+
+	/*
+	*  No error condition.
+	*/
+	free(pJobs);
+	return FALSE;
+
+error:
+	/* save job error status to p_info */
+	for (int i = 0; i < (int)*cJobs; i++) {	
+		*(jobStatus + i) = pJobs[i].Status;
+	}
+
+	free(pJobs);
+	return TRUE;
+}
+
+
+/* Send and receive of printing data */
+static void datatrans_work(P_CBTD_INFO p_info)
+{
+	DWORD jobNums = 0;
+
+	/* loop break when get error or no jobs */
+	for (;;) {
+
+		/* if job has any error, break out */
+		if (IsPrinterError((HANDLE)(p_info->printer_handle), &(DWORD)p_info->prt_state, p_info->prt_job_status, &jobNums)) {	
+			p_info->need_update = 1;
+			set_sysflags(p_info, ST_PRT_ERROR);
+			//break;
+		}
+
+		/* no job in panel, break out */
+		if (jobNums == 0) {
+			set_sysflags(p_info, ST_PRT_IDLE);
+			break;
+		}
+	}
 }
 
 /*  end of thread */
@@ -164,125 +215,60 @@ static void datatrans_cleanup(void* data)
 	return;
 }
 
-/* Send and receive of printing data */
-static void datatrans_work(P_CBTD_INFO p_info, int fd)
-{
-	char *data_buf;
-	int read_size, write_size;
-	int i;
-
-	data_buf = calloc(DATA_BUF_SIZE, sizeof(char));
-
-	/* in this moment, system can communicate with a printer */
-	for (;;)
-	{
-		read_size = 0;
-		/* receive printing data */
-		for (i = 0; i < INPUT_TIMEOUT && read_size <= 0; i++)
-		{
-			if (is_sysflags(p_info, ST_JOB_CANCEL)
-				|| !is_sysflags(p_info, ST_PRT_CONNECT)
-				|| is_sysflags(p_info, ST_SYS_DOWN))
-				goto CANCEL;
-
-			//read_size = read(fd, data_buf, DATA_BUF_SIZE);
-			read_size = 0;
-
-
-			if (read_size <= 0)
-				Sleep(1);
-		}
-
-		if (read_size <= 0)
-		{
-			free(data_buf);
-			_DEBUG_MESSAGE("Job end");
-			return;
-		}
-
-		/* send printing data to a printer */
-		write_size = read_size;
-		do
-		{
-			int tmp_size;
-
-			if (is_sysflags(p_info, ST_JOB_CANCEL)
-				|| !is_sysflags(p_info, ST_PRT_CONNECT))
-				goto CANCEL;
-
-			enter_critical(p_info->ecbt_accsess_critical);
-
-			tmp_size = write_size;
-			write_to_prt(p_info, SID_DATA,
-				data_buf + (read_size - write_size),
-				&write_size);
-			write_size = tmp_size - write_size;
-
-			leave_critical(p_info->ecbt_accsess_critical);
-
-			Sleep(10000);
-		} while (write_size > 0);
-	}
-
-	/* printing was canceled */
-CANCEL:
-	free(data_buf);
-
-	set_sysflags(p_info, ST_JOB_CANCEL);
-	lpd_stop(p_info);
-
-	_DEBUG_MESSAGE_VAL("Job cancel : system status =", p_info->sysflags);
-	return;
-}
 
 /* Thread to send printing data */
 void datatrans_thread(P_CBTD_INFO p_info)
 {
-	int fifo_fd;
-	char* fifo_path = p_info->infifo_path;
 	CARGS cargs;
-	//int set_flags, reset_flags;
+	int set_flags, reset_flags;
+	int p_max = 0;
+
+	HANDLE hPrinter = NULL;
+
+	if (!OpenPrinter(_T("EPSON R330 Series"), &hPrinter, NULL)) {
+		int err = GetLastError();
+		printf("unable to open %s, last error: %d\n", "EPSON R330 Series", err);
+		return;
+	}
+	if(hPrinter)
+		p_info->printer_handle = hPrinter;
 
 	//_DEBUG_MESSAGE_VAL("datatrans thread ID : ", (int)pthread_self());
 	_datatrans_lpr_flag = 0;
 
 	cargs.p_info = p_info;
-	cargs.p_max = &fifo_fd;
+	cargs.p_max = &p_max;
 	pthread_cleanup_push(datatrans_cleanup, (void *)&cargs);
 
 	for (;;)
 	{
-		fifo_fd = fifo_open(p_info, fifo_path);
-		if (fifo_fd < 0)
-		{
-			perror(fifo_path);
-			break;
-		}
-
 		/* Is daemon in the middle of process for end ? */
 		if (is_sysflags(p_info, ST_SYS_DOWN))
 			break;
 
 		p_info->datatrans_thread_status = THREAD_RUN;
-		//set_sysflags(p_info, ST_JOB_PRINTING);
 
-		//set_flags = 0;
-		//reset_flags = ST_PRT_CONNECT | ST_SYS_DOWN | ST_JOB_CANCEL;
+		/* 
+		 * todo: print job printing state may set when a task is create
+		 * we need to wait a ST_JOB_PRINTING here. The state may set by
+		 * comserv thread when a print job create by upsteam, send a sock
+		 * command to me.
+		 */
+		set_sysflags(p_info, ST_JOB_PRINTING);
 
-		//wait_sysflags(p_info, set_flags, reset_flags, 0, WAIT_SYS_AND);
+		set_flags = 0;
+		reset_flags = ST_PRT_CONNECT | ST_SYS_DOWN | ST_JOB_CANCEL;
 
-		//if (is_sysflags(p_info, ST_PRT_CONNECT))
-		//{
-			/* send and receive of printing data */
-		/*	open_port_channel(p_info, SID_DATA);
-			datatrans_work(p_info, fifo_fd);
-			close_port_channel(p_info, SID_DATA);
-			*/
-		//}
-		//reset_sysflags(p_info, ST_JOB_PRINTING);
+		wait_sysflags(p_info, set_flags, reset_flags, 0, WAIT_SYS_OR);
 
-		//if (fifo_fd)
-			//close(fifo_fd);
+		if (is_sysflags(p_info, ST_PRT_CONNECT))
+		{
+			datatrans_work(p_info);	
+		}
+
+		//reset_sysflags(p_info, ST_JOB_RECV);
+		
+		reset_sysflags(p_info, ST_JOB_PRINTING);
 
 		if (is_sysflags(p_info, ST_SYS_DOWN))
 			break;

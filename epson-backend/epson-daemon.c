@@ -190,11 +190,11 @@ static void init_cbtd(P_CBTD_INFO p_info)
 	/* default setup */
 	/* todo: windows has no port and fifo path */
 	strcpy(p_info->devprt_path, DEVICE_PATH);
-	strcpy(p_info->infifo_path, FIFO_PATH);
-	
+
 	p_info->comsock_port = DAEMON_PORT;
 
 	p_info->devfd = -1;
+	p_info->need_update = 1;
 
 	p_info->sysflags = 0;
 	p_info->sysflags_critical = init_critical();
@@ -254,12 +254,11 @@ static void cbtd_control(void)
 	{
 		/* turn into the main loop */
 		for (;;)
-		{
+		{		
 			set_flags = 0;
-			reset_flags = ST_SYS_DOWN | ST_CLIENT_CONNECT | ST_JOB_PRINTING | ST_JOB_CANCEL;
-			if (wait_sysflags(&info, set_flags, reset_flags, 5, WAIT_SYS_AND) == 0)
+			reset_flags = ST_SYS_DOWN | ST_CLIENT_CONNECT | ST_JOB_CANCEL;
+			if (wait_sysflags(&info, set_flags, reset_flags, 5, WAIT_SYS_OR) == 0)
 				break;
-			printf("first loop in daemon\n");
 
 			if (is_sysflags(&info, ST_DAEMON_WAKEUP))
 				reset_sysflags(&info, ST_DAEMON_WAKEUP);
@@ -279,16 +278,14 @@ static void cbtd_control(void)
 			/* check status */
 			for (;;)
 			{
-				set_flags = ST_CLIENT_CONNECT | ST_JOB_PRINTING | ST_JOB_CANCEL;
+				set_flags = ST_CLIENT_CONNECT | ST_JOB_CANCEL;
 				reset_flags = 0;
-				
-				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_OR) == 0)
+				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_AND) == 0)
 					break;
 
 				set_flags = ST_PRT_CONNECT;
 				reset_flags = ST_SYS_DOWN;
-
-				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_AND) == 0)
+				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_OR) == 0)
 					break;
 			}
 		}

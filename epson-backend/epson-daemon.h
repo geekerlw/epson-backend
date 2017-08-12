@@ -40,13 +40,15 @@ typedef struct _CBTD_INFO
 {
 	char printer_name[CONF_BUF_MAX]; /* the printer title that is set with lpr */
 	char devprt_path[CONF_BUF_MAX]; /* open device path */
-	char infifo_path[CONF_BUF_MAX]; /* fifo path */
 	unsigned int comsock_port; /* INET socket port */
 	int devfd;		/* device file descriptor */
+	int need_update;  /* printer status need update */
 
-	char prt_status[PRT_STATUS_MAX]; /* printer status */
+	char prt_status[PRT_STATUS_MAX]; /* printer status via usb protocol */
 	int prt_status_len;	/* size of printer status strings */
 	long status_post_time; /* the time that updated prt_status in the last */
+	unsigned long prt_state; /* printer status via windows spool */
+	unsigned long prt_job_status[PRT_STATUS_MAX]; /* print job status via windows spool */
 
 	int sysflags;		/* CBTD status flags */
 	void* sysflags_critical;
@@ -59,6 +61,7 @@ typedef struct _CBTD_INFO
 	int comserv_thread_status;
 
 	/* CBT control */
+	void* printer_handle;		/* windows spool printer handle */
 	void* ecbt_handle;
 	void* ecbt_accsess_critical;
 } CBTD_INFO, *P_CBTD_INFO;
@@ -74,15 +77,19 @@ enum _CBTD_THREAD_STATUS_NUMBERS {
 
 /* Status of a system */
 enum _CBTD_SYSTEM_FLAGS {
-	ST_SYS_DOWN = 1,	 /* 00000001  system is in the middle of end process */
+	ST_SYS_DOWN = 0x00000001,	 /* system is in the middle of end process */
+	ST_DAEMON_WAKEUP = 0x00000002,    /* system works */
 
-	ST_DAEMON_WAKEUP = 2,    /* 00000010  system works */
-	ST_PRT_CONNECT = 4,      /* 00000100  connected to a printer */
+	ST_PRT_CONNECT = 0x00000004,      /* connected to a printer */
+	ST_CLIENT_CONNECT = 0x00000008,   /* presence of connection from a client */
 
-	ST_CLIENT_CONNECT = 8,   /* 00001000  presence of connection from a client */
-	ST_JOB_PRINTING = 16,	 /* 00010000  print it */
-	ST_JOB_CANCEL = 32,      /* 00100000  canceling print job */
-	ST_JOB_CANCEL_NO_D4 = 64 /* 01000000  wait for reset of a printer */
+	ST_JOB_RECV = 0x00000010,
+	ST_JOB_PRINTING = 0x00000020,	 /* recv a print job */
+	ST_JOB_CANCEL = 0x00000040,      /* cancel print job */
+	ST_JOB_ERROR = 0x00000080,		/* printer job is in err state */
+
+	ST_PRT_IDLE = 0x000000100,		/* printer is in idle state */
+	ST_PRT_ERROR = 0x000000200,		/* printer is in err state */
 };
 
 void usleep(__int64 usec); 
