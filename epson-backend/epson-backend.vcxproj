@@ -144,6 +144,7 @@
   <ItemGroup>
     <ClCompile Include="epson-command.c" />
     <ClCompile Include="epson-comserv.c" />
+    <ClCompile Include="epson-dataparse.c" />
     <ClCompile Include="epson-datatrans.c" />
     <ClCompile Include="epson-daemon.c" />
     <ClCompile Include="epson-hw.c" />
@@ -153,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="epson-daemon.h" />
+    <ClInclude Include="epson-dataparse.h" />
     <ClInclude Include="epson-def.h" />
     <ClInclude Include="epson-hw.h" />
     <ClInclude Include="epson-local.h" />

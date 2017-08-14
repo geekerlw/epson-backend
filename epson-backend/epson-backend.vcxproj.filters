@@ -39,6 +39,9 @@
     <ClCompile Include="epson-command.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="epson-dataparse.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="epson-thread.h">
@@ -60,6 +63,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="epson-local.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="epson-dataparse.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
