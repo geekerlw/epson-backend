@@ -185,14 +185,6 @@ typedef struct _tagECB_PRINTER_ {
 	ECB_INT32	language;
 } ECB_PRINTER;
 
-int Init_Lib(void);
-void Close_Lib(void);
-void Cancel_Job(void);
-void Resume_Job(void);
-ECB_PRINTER_ERR Nozzle_Check(void);
-ECB_PRINTER_ERR Head_Cleaning(void);
 ECB_PRINTER_STS Get_Status (ECB_STATUS* status);
-ECB_INK_RESET_STS Reset_Ink_Counter(int ink);
-int Get_Printer_Info(ECB_PRINTER* printer);
 
 #endif /* __EPSON_DATAPARSE_H__ */

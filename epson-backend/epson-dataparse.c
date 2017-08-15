@@ -22,6 +22,7 @@
 #include "epson-dataparse.h"
 
 #define TIME_OUT 3
+#define EPS_INK_NORMALIZE_LEVEL (5)
 
 typedef struct INK_NODE {
 	unsigned long id;
@@ -68,9 +69,7 @@ enum Inkbox_Id
 	ECB_COLOR_CLEAN
 };
 
-
-enum Inkbox_Id
-	inkbox_get_inkid(unsigned long id)
+enum Inkbox_Id inkbox_get_inkid(unsigned long id)
 {
 	enum Inkbox_Id color;
 
@@ -115,7 +114,6 @@ enum Inkbox_Id
 	}
 	return	color;
 }
-
 
 static int hextoi(char hex)
 {
@@ -181,12 +179,9 @@ static int hextoi(char hex)
 	return value;
 }
 
-#define EPS_INK_NORMALIZE_LEVEL (5)
-int    serInkLevelNromalize(
 
-	int level
-
-) {
+int serInkLevelNromalize(int level) 
+{
 	int norm = 0;
 	if (EPS_INK_NORMALIZE_LEVEL > 3 && (level >= 1) && (level <= 3)) {
 		norm = 1;
@@ -204,8 +199,7 @@ int    serInkLevelNromalize(
 static ECB_PRINTER_STS ReadStatuslogfile(InkList *, ECB_PRINTER_ERR* errorCode);
 static void ink_list_delete(InkList);
 
-static ECB_PRINTER_STS
-ReadStatuslogfile(InkList *list, ECB_PRINTER_ERR* errorCode)
+static ECB_PRINTER_STS ReadStatuslogfile(InkList *list, ECB_PRINTER_ERR* errorCode)
 {
 	char *lpInk, *lpSts, *lpErr, *lpCC, *lpMC, *lpWC, *lpAC, *lpCB, *lpMB, *lpCS;
 	char lpReply[1024], StsCode[3], ErrCode[3];
@@ -517,8 +511,7 @@ RETRY:
 	return ECB_DAEMON_NO_REPLY;
 }
 
-static void
-connect_daemon()
+static void connect_daemon()
 {
 	/* Renewal of ink residual quantity */
 	printer_status = ReadStatuslogfile(&ink_list, &error_code);
@@ -544,82 +537,6 @@ ink_list_delete(InkList list)
 /*             Definition of API Functions                                      */
 /*                                                                              */
 /* -----------------------------------------------------------------------------*/
-
-int Init_Lib(void) {
-
-	return sock_open();
-
-}
-
-void Close_Lib(void) {
-
-	sock_close();
-
-	return;
-}
-
-
-
-void Cancel_Job(void) {
-
-	char cancel_command[] = "cancel";
-	char di_command[] = { 'd','i',0x01, 0x00, 0x01 };
-	int len;
-
-	len = strlen(cancel_command);
-	sock_write_abandon_reply(cancel_command, &len);
-
-	len = sizeof(di_command);
-	sock_write(di_command, &len);
-
-	return;
-}
-
-void Resume_Job(void) {
-
-	char feedin_command[] = { 'p','e',0x01, 0x00, 0x01 };
-	int len;
-
-	len = sizeof(feedin_command);
-	sock_write_abandon_reply(feedin_command, &len);
-
-	return;
-}
-
-
-ECB_PRINTER_ERR Nozzle_Check(void) {
-
-	char nozzlecheck_command[] = "nozzlecheck";
-	int len;
-	ECB_PRINTER_ERR err = ECB_PRNERR_NOERROR;
-
-	len = strlen(nozzlecheck_command);
-	err = (ECB_PRINTER_ERR)sock_write_abandon_reply(nozzlecheck_command, &len);
-
-	if (err == 1) {
-		err = ECB_PRNERR_COMM;
-	}
-
-	return err;
-
-}
-
-ECB_PRINTER_ERR Head_Cleaning(void) {
-
-	char headcleaning_command[] = "headcleaning";
-	int len;
-	ECB_PRINTER_ERR err = ECB_PRNERR_NOERROR;
-
-	len = strlen(headcleaning_command);
-	err = (ECB_PRINTER_ERR)sock_write_abandon_reply(headcleaning_command, &len);
-
-	if (err == 1) {
-		err = ECB_PRNERR_COMM;
-	}
-
-	return err;
-
-}
 
 
 ECB_PRINTER_STS Get_Status(ECB_STATUS* status)
@@ -698,82 +615,4 @@ ECB_PRINTER_STS Get_Status(ECB_STATUS* status)
 	status->showInkLow = showInkLow;
 
 	return ret;
-}
-
-ECB_INK_RESET_STS Reset_Ink_Counter(int ink) {
-	char rbuf[128];
-
-	char resetink_command[] = { 'r','i',0x02, 0x00, 0x00, ink };
-	int len, rsize;
-
-	len = sizeof(resetink_command);
-	sock_write_with_reply(resetink_command, &len, rbuf, &rsize);
-
-
-	if (rsize <= 0) {
-		return ECB_INK_RESET_COMM_ERROR;
-	}
-
-	if (strncmp(rbuf + 6, "OK", 2) == 0) {
-		return ECB_INK_RESET_OK;
-	}
-	else if (strncmp(rbuf + 6, "NA", 2) == 0) {
-		return ECB_INK_RESET_NA;
-	}
-	else if (strncmp(rbuf + 6, "BUSY", 4) == 0) {
-		return ECB_INK_RESET_BUSY;
-	}
-
-	return ECB_INK_RESET_COMM_ERROR;
-
-}
-
-int Get_Printer_Info(ECB_PRINTER* printer) {
-
-	char getdeviceid_command[] = "getdeviceid";
-	int len, rsize;
-
-	char deviceid[256];
-
-	clock_t start, stop;
-
-	start = time(NULL);
-
-
-	while (1) {
-		len = sizeof(getdeviceid_command);
-		printf("steven: jump into sock_write with reply\n");
-		sock_write_with_reply(getdeviceid_command, &len, deviceid, &rsize);
-
-		double diff;
-		stop = time(NULL);
-		diff = difftime(stop, start);
-		if ((diff > TIME_OUT) || (rsize > 0)) break;
-
-	}
-
-	if (rsize == 0) return 0;
-
-	deviceid[rsize] = 0;
-
-	char *manufacture, *command, *model;
-	manufacture = strtok(deviceid, ";");
-	printf("MFG=%s\n", manufacture + 4);
-	command = strtok(NULL, ";");
-	printf("CMD=%s\n", command + 4);
-	model = strtok(NULL, ";");
-	printf("MDL=%s\n", model + 4);
-
-	strcpy(printer->manufacture, manufacture + 4);
-	strcpy(printer->modelname, model + 4);
-
-	if (strstr(command, "ESCP") != NULL) {
-		printer->language = ECB_LANG_ESCPR;
-	}
-	else if (strstr(command, "ESCPAGE") != NULL) {
-		printer->language = ECB_LANG_ESCPAGE;
-	}
-
-	return rsize;
-
 }
