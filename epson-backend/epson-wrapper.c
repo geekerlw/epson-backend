@@ -21,11 +21,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <Windows.h>
-#include "epson-def.h"
+
+#include "epson.h"
 #include "epson-hw.h"
-#include "epson-thread.h"
-#include "epson-wrapper.h"
-#include "epson-daemon.h"
 
 /* Repeat number of times when communication error with printer
 occurred. */
