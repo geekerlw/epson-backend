@@ -37,8 +37,6 @@
 
 #include <sys/types.h>
 
-#include "epson.h"
-#include "epson-types.h"
 #include "epson-thread.h"
 
 
