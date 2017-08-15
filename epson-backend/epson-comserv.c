@@ -22,6 +22,7 @@
 * code used other then `cbt'.
 */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -29,7 +30,6 @@
 #include <Windows.h>
 
 #include "epson.h"
-#include "epson-types.h"
 #include "epson-thread.h"
 #include "epson-wrapper.h"
 
@@ -967,7 +967,7 @@ static void comserv_cleanup(void* data)
 		set_sysflags(p_cargs->p_info, ST_SYS_DOWN);
 
 	p_cargs->p_info->comserv_thread_status = THREAD_DOWN;
-	_DEBUG_MESSAGE("Command server thread ...down");
+	printf("Command server thread ...down\n");
 	return;
 }
 
@@ -1018,7 +1018,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 
 		if (select (maxval + 1, &watch_fds, NULL, NULL, &tv) < 0)
 		{
-			_DEBUG_FUNC(perror ("cs select ()"));
+			perror ("cs select ()");
 			continue;
 		}
 
@@ -1049,7 +1049,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 					if (client_fd < 0)
 						continue;
 
-					_DEBUG_MESSAGE_VAL("connect client fd = ", client_fd);
+					printf("connect client fd = %d\n", client_fd);
 					FD_SET (client_fd, &sock_fds);
 
 					if (maxval < client_fd)
@@ -1070,7 +1070,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 					if (nread == 0)
 					{
 						/* disconnecting */
-						_DEBUG_MESSAGE_VAL("deconnect client fd = ", fd);
+						printf("deconnect client fd = %d\n", fd);
 						shutdown (fd, 2);
 						FD_CLR (fd, &sock_fds);						
 

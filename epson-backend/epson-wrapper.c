@@ -24,6 +24,7 @@
 
 #include "epson.h"
 #include "epson-hw.h"
+#include "epson-thread.h"
 #include "epson-wrapper.h"
 
 /* Repeat number of times when communication error with printer

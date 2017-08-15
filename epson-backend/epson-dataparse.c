@@ -19,8 +19,8 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-#include "epson-dataparse.h"
-#include "epson-daemon.h"
+
+#include "epson.h"
 
 #define TIME_OUT 3
 #define EPS_INK_NORMALIZE_LEVEL (5)

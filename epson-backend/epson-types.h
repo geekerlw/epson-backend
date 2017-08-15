@@ -35,6 +35,19 @@ typedef EPS_INT32      EPS_BOOL;        /* Boolean type                         
 typedef EPS_INT32      EPS_ERR_CODE;    /* Error code for API's and routines                */
 typedef int            EPS_SOCKET;      /* socket discripter                                */
 
+/*------------------------------- Define Basic Data Types ------------------------------*/
+/*******************************************|********************************************/
+typedef unsigned char  ECB_UINT8;       /* unsigned  8-bit  Min: 0          Max: 255        */
+typedef unsigned short ECB_UINT16;      /* unsigned 16-bit  Min: 0          Max: 65535      */
+typedef unsigned int   ECB_UINT32;      /* unsigned 32-bit  Min: 0          Max: 4294967295 */
+typedef char           ECB_INT8;        /*   signed  8-bit  Min: -128       Max: 127        */
+typedef short          ECB_INT16;       /*   signed 16-bit  Min: -32768     Max: 32767      */
+typedef int            ECB_INT32;       /*   signed 32-bit  Min:-2147483648 Max: 2147483647 */
+typedef float          ECB_FLOAT;       /*    float 32-bit  Min:3.4E-38     Max: 3.4E+38    */
+typedef ECB_INT32      ECB_BOOL;        /* Boolean type                                     */
+typedef ECB_INT32      ECB_ERR_CODE;    /* Error code for API's and routines                */
+typedef int            ECB_SOCKET;      /* socket discripter                                */
+
 
 typedef enum
 {
@@ -121,6 +134,85 @@ typedef enum
   EPS_PRNERR_JPG_LIMIT                            ,   /* Jpeg print data size limit   */
   EPS_PRNERR_DISABEL_CLEANING                     ,    /* can not start Head Cleaning  */
 }PRINTER_STS;
+
+typedef enum
+{
+  /* from lib-l2/epson-escpr-err.h: enum EPS_PRINTER_ERROR */
+  ECB_PRNERR_NOERROR = 0                         ,
+  ECB_PRNERR_GENERAL                             ,
+  ECB_PRNERR_FATAL                               ,
+  ECB_PRNERR_INTERFACE                           ,
+  ECB_PRNERR_COVEROPEN                           ,
+/*  ECB_PRNERR_LEVERPOSITION                       ,*/  /* Not supported by 2006 Model  */
+  ECB_PRNERR_PAPERJAM                            ,
+  ECB_PRNERR_INKOUT                              ,
+  ECB_PRNERR_PAPEROUT                            ,
+/*  ECB_PRNERR_INITIALIZESETTING                   ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_UNKNOWN                             ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_PAPERCHANGE_UNCOMP                  ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_PAPERSIZE                           ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_RIBBONJAM                           ,*/  /* Not supported by 2006 Model  */
+  ECB_PRNERR_SIZE_TYPE_PATH                      ,
+/*  ECB_PRNERR_PAPERTHICKLEVER                     ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_PAPERFEED                           ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_SIMMCOPY                            ,*/  /* Not supported by 2006 Model  */
+  ECB_PRNERR_SERVICEREQ                          ,    /* EPS_PRNERR_INKOVERFLOW1      */
+/*  ECB_PRNERR_WAITTEAROFFRETURN                   ,*/  /* Not supported by 2006 Model  */
+  ECB_PRNERR_DOUBLEFEED                          ,
+/*  ECB_PRNERR_HEADHOT                             ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_PAPERCUTMIS                         ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_HOLDLEVERRELEASE                    ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_NOT_CLEANING                        ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_PAPERCONFIG                         ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_PAPERSLANT                          ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_CLEANINGNUMOVER                     ,*/  /* Not supported by 2006 Model  */
+  ECB_PRNERR_INKCOVEROPEN                        ,
+/*  ECB_PRNERR_LFP_INKCARTRIDGE                    ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_CUTTER                              ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_CUTTERJAM                           ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_INKCOLOR                            ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_CUTTERCOVEROPEN                     ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_LFP_INKLEVERRELEASE                 ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_LFP_NOMAINTENANCETANK1              ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_CARTRIDGECOMBINATION                ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_LFP_COMMAND                         ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_LEARCOVEROPEN                       ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_MULTICENSORGAIN                     ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_NOT_AUTOADJUST                      ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_FAILCLEANING                        ,*/  /* Not supported by 2006 Model  */
+  ECB_PRNERR_NOTRAY                              ,
+  ECB_PRNERR_CARDLOADING                         ,
+  ECB_PRNERR_CARTRIDGEOVERFLOW                   ,
+/*  ECB_PRNERR_LFP_NOMAINTENANCETANK2              ,*/  /* Not supported by 2006 Model  */
+/*  ECB_PRNERR_INKOVERFLOW2                        ,*/  /* Not supported by 2006 Model  */
+  ECB_PRNERR_BATTERYVOLTAGE                      ,
+  ECB_PRNERR_BATTERYTEMPERATURE                  ,
+  ECB_PRNERR_BATTERYEMPTY                        ,
+  ECB_PRNERR_SHUTOFF                             ,
+  ECB_PRNERR_NOT_INITIALFILL                     ,
+  ECB_PRNERR_PRINTPACKEND                        ,
+/*  ECB_PRNERR_ABNORMALHEAT                        ,*/  /* Not supported by 2006 Model  */
+  ECB_PRNERR_SCANNEROPEN                         ,
+  ECB_PRNERR_CDRGUIDEOPEN                        ,
+  /* append for 2008 Model  */
+  ECB_PRNERR_CDDVDCONFIG                         ,
+  ECB_PRNERR_CDREXIST_MAINTE                     ,
+  /* Status Error                                                                     */
+  ECB_PRNERR_BUSY    = 100                        ,
+  ECB_PRNERR_FACTORY                              ,
+  /* Communication Error                                                              */
+  ECB_PRNERR_COMM                                 ,
+  /* Ink Error                                                                        */
+  ECB_PRNERR_CEMPTY                               ,
+  ECB_PRNERR_CFAIL                                ,
+  /* Printer Condition                                                                */
+  ECB_PRNERR_TRAYCLOSE                            ,
+  ECB_PRNERR_CDGUIDECLOSE                         ,   /* CDR guide close              */
+/*    ECB_PRNERR_OVERHEAT                                  OVERHEAT is not an error     */
+  ECB_PRNERR_JPG_LIMIT                            ,   /* Jpeg print data size limit   */
+  ECB_PRNERR_DISABEL_CLEANING                     ,    /* can not start Head Cleaning  */
+
+}ECB_PRINTER_ERR;
 
 typedef enum
 {

@@ -28,6 +28,8 @@
 
 #include "epson-types.h"
 
+#define DAEMON_PORT        35587
+
 #define CBTD_THREAD_STACK_SIZE 0x4000 /* unused */
 
 #define PRT_STATUS_MAX 256	/* maximum size of printer status strings */
@@ -97,10 +99,8 @@ enum _CBTD_SYSTEM_FLAGS {
 void usleep(__int64 usec); 
 void end_cbtd(P_CBTD_INFO);
 int end_epson_cbt(P_CBTD_INFO);
-void sig_set(void);
-int parameter_setup(P_CBTD_INFO);
-int parameter_update(P_CBTD_INFO);
 void datatrans_thread(P_CBTD_INFO);
 void comserv_thread(P_CBTD_INFO);
+ECB_PRINTER_STS Get_Status(P_CBTD_INFO);
 
 #endif /* __EPSON_DAEMON_H__ */

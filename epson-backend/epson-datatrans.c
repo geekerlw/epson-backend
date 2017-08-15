@@ -211,7 +211,7 @@ static void datatrans_cleanup(void* data)
 		set_sysflags(p_cargs->p_info, ST_SYS_DOWN);
 
 	p_cargs->p_info->datatrans_thread_status = THREAD_DOWN;
-	_DEBUG_MESSAGE("Data transfer thread ...down");
+	printf("Data transfer thread ...down\n");
 	return;
 }
 

@@ -55,9 +55,8 @@
 #include <assert.h>
 #include <Windows.h>
 #include <SetupAPI.h>
-#include "epson-def.h"
-#include "epson-typedefs.h"
-#include "epson-daemon.h"
+
+#include "epson.h"
 #include "epson-thread.h"
 #include "epson-wrapper.h"
 
@@ -188,10 +187,6 @@ static void init_cbtd(P_CBTD_INFO p_info)
 	memset(p_info, 0, sizeof(CBTD_INFO));
 	p_info->status = (ECB_STATUS *)malloc(sizeof(ECB_STATUS));
 
-	/* default setup */
-	/* todo: windows has no port and fifo path */
-	strcpy(p_info->devprt_path, DEVICE_PATH);
-
 	p_info->comsock_port = DAEMON_PORT;
 
 	p_info->devfd = -1;
@@ -300,7 +295,7 @@ static void cbtd_control(void)
 			/* fixme: devfd maybe a HANDLE, so I use CloseHandle instead */
 			//close(info.devfd);
 			CloseHandle((HANDLE)info.devfd);
-			_DEBUG_MESSAGE("deconnect printer\n");
+			printf("deconnect printer\n");
 			info.devfd = -1;
 
 			if (!is_sysflags(&info, ST_SYS_DOWN))
