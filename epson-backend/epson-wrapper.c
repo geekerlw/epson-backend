@@ -29,9 +29,6 @@
 occurred. */
 #define ECBT_ACCSESS_WAIT_MAX 20
 
-#define SID_CTRL 0x02		/* control channel */
-#define SID_DATA 0x40		/* data channel */
-
 /* Initialize ECBT */
 int start_ecbt_engine(void)
 {

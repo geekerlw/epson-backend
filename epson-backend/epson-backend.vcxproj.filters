@@ -24,9 +24,6 @@
     <ClCompile Include="epson-thread.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="epson-signal.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="epson-wrapper.c">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -45,9 +42,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="epson-thread.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="epson-def.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="epson-wrapper.h">

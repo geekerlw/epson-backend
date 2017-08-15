@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "epson-def.h"
-#include "epson-typedefs.h"
-#include "epson-daemon.h"
+
+#include "epson.h"
+#include "epson-types.h"
 
 static const EPS_UINT8 ExitPacketMode[] = {
 	0x00, 0x00, 0x00, 0x1B, 0x01, 0x40, 0x45, 0x4A, 0x4C, 0x20,

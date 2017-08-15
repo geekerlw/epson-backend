@@ -28,9 +28,7 @@
 #define __EPSON_THREAD_H__
 
 #include <Windows.h>
-#include "epson-def.h"
-#include "epson-types.h"
-#include "epson-daemon.h"
+#include "epson.h"
 
 /* information to do cleanup of a system */
 typedef struct _CLEANUP_ARGS

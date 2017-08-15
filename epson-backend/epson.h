@@ -33,6 +33,9 @@
 #define PRT_STATUS_MAX 256	/* maximum size of printer status strings */
 #define CONF_BUF_MAX 100	/* maximum size of configuration strings */
 
+#define EPS_MNT_NOZZLE     0
+#define EPS_MNT_CLEANING   1
+
 
 typedef struct _CBTD_INFO
 {

@@ -27,12 +27,11 @@
 #include <assert.h>
 #include <WinSock2.h>
 #include <Windows.h>
-#include "epson-def.h"
-#include "epson-typedefs.h"
-#include "epson-daemon.h"
+
+#include "epson.h"
+#include "epson-types.h"
 #include "epson-thread.h"
 #include "epson-wrapper.h"
-#include "epson-dataparse.h"
 
 #ifndef _CRT_NO_TIME_T
 #define HAVE_STRUCT_TIMESPEC
@@ -443,7 +442,7 @@ static int post_prt_status(P_CBTD_INFO p_info)
 
 	if (gettimeofday(&tv, NULL) < 0)
 	{
-		_DEBUG_FUNC(perror("gettimeofday"));
+		perror("gettimeofday");
 	}
 
 	now_time = tv.tv_sec;

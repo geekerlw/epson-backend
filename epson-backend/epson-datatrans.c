@@ -34,7 +34,7 @@
 #include <pthread.h>
 #endif
 
-#include "epson-daemon.h"
+#include "epson.h"
 #include "epson-thread.h"
 
 

@@ -37,10 +37,10 @@
 
 #include <sys/types.h>
 
-#include "epson-def.h"
-#include "epson-typedefs.h"
+#include "epson.h"
+#include "epson-types.h"
 #include "epson-thread.h"
-#include "epson-daemon.h"
+
 
 #pragma comment(lib,"x86/pthreadVSE2.lib")
 
