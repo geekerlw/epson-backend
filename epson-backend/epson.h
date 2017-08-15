@@ -97,10 +97,18 @@ enum _CBTD_SYSTEM_FLAGS {
 };
 
 void usleep(__int64 usec); 
+int gettimeofday(struct timeval *tp, void *tzp);
 void end_cbtd(P_CBTD_INFO);
 int end_epson_cbt(P_CBTD_INFO);
 void datatrans_thread(P_CBTD_INFO);
 void comserv_thread(P_CBTD_INFO);
 ECB_PRINTER_STS Get_Status(P_CBTD_INFO);
+int write_prt_command(P_CBTD_INFO, char*, int, char*, int*);
+int post_prt_status(P_CBTD_INFO);
+EPS_ERR_CODE epsMakeMainteCmd(
+	EPS_INT32		cmd,
+	EPS_UINT8*		buffer,
+	EPS_UINT32*		buffersize
+);
 
 #endif /* __EPSON_DAEMON_H__ */

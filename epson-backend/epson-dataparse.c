@@ -19,7 +19,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
-
 #include "epson.h"
 
 #define TIME_OUT 3
