@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include <Windows.h>
 #include "epson-def.h"
-#include "epson-typedefs.h"
 #include "epson-hw.h"
 #include "epson-thread.h"
 #include "epson-wrapper.h"
@@ -31,6 +30,9 @@
 /* Repeat number of times when communication error with printer
 occurred. */
 #define ECBT_ACCSESS_WAIT_MAX 20
+
+#define SID_CTRL 0x02		/* control channel */
+#define SID_DATA 0x40		/* data channel */
 
 /* Initialize ECBT */
 int start_ecbt_engine(void)

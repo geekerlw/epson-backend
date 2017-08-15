@@ -21,9 +21,6 @@
     <ClCompile Include="epson-datatrans.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="epson-daemon.c">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="epson-thread.c">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -42,18 +39,15 @@
     <ClCompile Include="epson-dataparse.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="epson.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="epson-thread.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="epson-def.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="epson-typedefs.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="epson-daemon.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="epson-wrapper.h">
@@ -65,7 +59,10 @@
     <ClInclude Include="epson-local.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="epson-dataparse.h">
+    <ClInclude Include="epson-types.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="epson.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

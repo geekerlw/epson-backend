@@ -26,7 +26,7 @@
 #ifndef __EPSON_DAEMON_H__
 #define __EPSON_DAEMON_H__
 
-#include "epson-dataparse.h"
+#include "epson-types.h"
 
 #define CBTD_THREAD_STACK_SIZE 0x4000 /* unused */
 

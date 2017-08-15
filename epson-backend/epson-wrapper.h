@@ -20,10 +20,6 @@
 #ifndef __EPSON_WRAPPER_H__
 #define __EPSON_WRAPPER_H__
 
-#define SID_CTRL 0x02		/* control channel */
-#define SID_DATA 0x40		/* data channel */
-
-
 int start_ecbt_engine(void);
 int end_ecbt_engine(void);
 int open_port_driver(P_CBTD_INFO);

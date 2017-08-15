@@ -29,7 +29,7 @@
 
 #include <Windows.h>
 #include "epson-def.h"
-#include "epson-typedefs.h"
+#include "epson-types.h"
 #include "epson-daemon.h"
 
 /* information to do cleanup of a system */

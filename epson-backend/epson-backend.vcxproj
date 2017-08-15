@@ -146,20 +146,19 @@
     <ClCompile Include="epson-comserv.c" />
     <ClCompile Include="epson-dataparse.c" />
     <ClCompile Include="epson-datatrans.c" />
-    <ClCompile Include="epson-daemon.c" />
+    <ClCompile Include="epson.c" />
     <ClCompile Include="epson-hw.c" />
     <ClCompile Include="epson-signal.c" />
     <ClCompile Include="epson-thread.c" />
     <ClCompile Include="epson-wrapper.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="epson-daemon.h" />
-    <ClInclude Include="epson-dataparse.h" />
+    <ClInclude Include="epson.h" />
     <ClInclude Include="epson-def.h" />
     <ClInclude Include="epson-hw.h" />
     <ClInclude Include="epson-local.h" />
     <ClInclude Include="epson-thread.h" />
-    <ClInclude Include="epson-typedefs.h" />
+    <ClInclude Include="epson-types.h" />
     <ClInclude Include="epson-wrapper.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

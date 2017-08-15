@@ -17,8 +17,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef __EPSON_TYPEDEFS_H__
-#define __EPSON_TYPEDEFS_H__
+#ifndef __EPSON_TYPES_H__
+#define __EPSON_TYPES_H__
 
 typedef void* HANDLE;
 
@@ -131,6 +131,60 @@ typedef enum
   STS_DEFAULT
 }DAEMON_STS;
 
-#endif /* __EPSON_TYPEDEFS_H__ */        
+typedef enum
+{
+	/* from lib-l2/epson-escpr-err.h: enum EPS_PRINTER_STATUS */
+	ECB_PRNST_IDLE = 0,    /* Idle (Enable Start Job)      */
+	ECB_PRNST_BUSY,    /* Busy (Disable Start Job)     */
+	ECB_PRNST_PRINTING,    /* Printing                     */
+	ECB_PRNST_CANCELLING,    /* Cancellation processing      */
+	ECB_PRNST_ERROR,    /* Printer has an error         */
+
+	ECB_DAEMON_NO_ERROR = 0,
+	ECB_DAEMON_DOWN = 100,         /* add sk -Mon Mar 12 2001 */
+	ECB_DAEMON_NO_REPLY,
+	ECB_DAEMON_PRINTER_RESET,
+	ECB_DAEMON_DEFAULT
+
+}ECB_PRINTER_STS;
+
+#define ECB_INK_NUM		20
+#define INKLOW           5
+typedef struct _tagECB_PAPER_COUNT_ {
+	EPS_INT32	color;
+	EPS_INT32	monochrome;
+	EPS_INT32	blank;
+	EPS_INT32	adf;
+	EPS_INT32	color_borderless;
+	EPS_INT32	monochrome_borderless;
+} ECB_PAPER_COUNT;
+
+typedef struct _tagECB_STATUS_ {
+	EPS_INT32		printerStatus;
+	EPS_INT32		errorCode;
+	EPS_INT32		ink_num;
+	EPS_INT32		colors[ECB_INK_NUM];
+	EPS_INT32		inklevel[ECB_INK_NUM];
+	EPS_INT32		inkstatus[ECB_INK_NUM];
+	ECB_PAPER_COUNT paper_count;
+	EPS_BOOL		showInkInfo;
+	EPS_BOOL		showInkLow;
+} ECB_STATUS;
+
+
+/*** Ink Cartridge Status                                                           */
+/*** -------------------------------------------------------------------------------*/
+#define ECB_INK_ST_NORMAL                        (0)
+#define ECB_INK_ST_LOW                           (1)
+#define ECB_INK_ST_END                           (2)
+#define ECB_INK_ST_NOTPRESENT                    -1
+#define ECB_INK_ST_FAIL                          -2
+#define ECB_INK_ST_NOTAVAIL                      -3
+#define ECB_INK_ST_NOREAD                        -4
+
+
+#define ECB_NAME_BUFFSIZE  64
+
+#endif /* __EPSON_TYPES_H__ */        
 
 
