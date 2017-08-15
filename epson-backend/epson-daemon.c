@@ -186,6 +186,7 @@ int end_epson_cbt(P_CBTD_INFO p_info)
 static void init_cbtd(P_CBTD_INFO p_info)
 {
 	memset(p_info, 0, sizeof(CBTD_INFO));
+	p_info->status = (ECB_STATUS *)malloc(sizeof(ECB_STATUS));
 
 	/* default setup */
 	/* todo: windows has no port and fifo path */
@@ -238,6 +239,9 @@ void end_cbtd(P_CBTD_INFO p_info)
 	if (p_info->ecbt_accsess_critical)
 		delete_critical(p_info->ecbt_accsess_critical);
 
+	if (p_info->status)
+		free(p_info->status);
+
 	return;
 }
 
@@ -254,7 +258,7 @@ static void cbtd_control(void)
 	{
 		/* turn into the main loop */
 		for (;;)
-		{		
+		{
 			set_flags = 0;
 			reset_flags = ST_SYS_DOWN | ST_CLIENT_CONNECT | ST_JOB_CANCEL;
 			if (wait_sysflags(&info, set_flags, reset_flags, 5, WAIT_SYS_OR) == 0)

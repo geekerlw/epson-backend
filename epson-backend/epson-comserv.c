@@ -32,6 +32,7 @@
 #include "epson-daemon.h"
 #include "epson-thread.h"
 #include "epson-wrapper.h"
+#include "epson-dataparse.h"
 
 #ifndef _CRT_NO_TIME_T
 #define HAVE_STRUCT_TIMESPEC
@@ -1031,6 +1032,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 				reset_sysflags(p_info, ST_PRT_CONNECT);
 			}
 			else {
+				ECB_PRINTER_STS ret = Get_Status(p_info);
 				p_info->need_update = 0;
 			}
 		}
