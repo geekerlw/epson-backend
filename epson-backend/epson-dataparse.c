@@ -20,6 +20,7 @@
 #include <time.h>
 #include <string.h>
 #include "epson-dataparse.h"
+#include "epson-daemon.h"
 
 #define TIME_OUT 3
 #define EPS_INK_NORMALIZE_LEVEL (5)
@@ -196,51 +197,22 @@ int serInkLevelNromalize(int level)
 }
 
 
-static ECB_PRINTER_STS ReadStatuslogfile(InkList *, ECB_PRINTER_ERR* errorCode);
-static void ink_list_delete(InkList);
 
-static ECB_PRINTER_STS ReadStatuslogfile(InkList *list, ECB_PRINTER_ERR* errorCode)
+static ECB_PRINTER_STS ReadStatuslogfile(P_CBTD_INFO p_info, InkList *list, ECB_PRINTER_ERR* errorCode)
 {
 	char *lpInk, *lpSts, *lpErr, *lpCC, *lpMC, *lpWC, *lpAC, *lpCB, *lpMB, *lpCS;
 	char lpReply[1024], StsCode[3], ErrCode[3];
 	char get_status_command[] = { 's', 't', 0x01, 0x00, 0x01 };
-	int com_len, rep_len;
-
-	clock_t start, stop;
-
-	start = time(NULL);
-RETRY:
+	int  rep_len;
 
 	/* Initialization */
 	StsCode[2] = 0;
 	ErrCode[2] = 0;
 	*list = NULL;
 
-
-	com_len = sizeof(get_status_command);
-	rep_len = 1024;
-	/* Log file reading */
-
-	if (sock_write(get_status_command, &com_len) < 0)
-	{
-		if (sock_reopen() < 0)
-		{
-			return ECB_DAEMON_DOWN;
-		}
-		return ECB_DAEMON_NO_REPLY;
-	}
-
-	sock_read(lpReply, &rep_len);
-
-	if (rep_len == 0)
-	{
-		double diff;
-		stop = time(NULL);
-		diff = difftime(stop, start);
-		if (diff < TIME_OUT) goto RETRY;
-
-		return ECB_DAEMON_NO_REPLY;
-	}
+	//sock_read(lpReply, &rep_len);
+	memcpy(lpReply, p_info->prt_status, sizeof(p_info->prt_status));
+	rep_len = sizeof(p_info->prt_status);
 
 	/* Ink kind analysis */
 	lpInk = strstr(lpReply, "INK:");
@@ -511,17 +483,7 @@ RETRY:
 	return ECB_DAEMON_NO_REPLY;
 }
 
-static void connect_daemon()
-{
-	/* Renewal of ink residual quantity */
-	printer_status = ReadStatuslogfile(&ink_list, &error_code);
-	ink_list_delete(ink_list);
-	return;
-}
-
-
-static void
-ink_list_delete(InkList list)
+static void ink_list_delete(InkList list)
 {
 	InkNode *node;
 
@@ -533,13 +495,24 @@ ink_list_delete(InkList list)
 	return;
 }
 
+
+
+static void connect_daemon(P_CBTD_INFO p_info)
+{
+	/* Renewal of ink residual quantity */
+	printer_status = ReadStatuslogfile(p_info, &ink_list, &error_code);
+	ink_list_delete(ink_list);
+	return;
+}
+
+
 /* -----------------------------------------------------------------------------*/
 /*             Definition of API Functions                                      */
 /*                                                                              */
 /* -----------------------------------------------------------------------------*/
 
 
-ECB_PRINTER_STS Get_Status(ECB_STATUS* status)
+ECB_PRINTER_STS Get_Status(P_CBTD_INFO p_info)
 {
 
 	int i;
@@ -552,67 +525,67 @@ ECB_PRINTER_STS Get_Status(ECB_STATUS* status)
 
 	ECB_PRINTER_STS ret = ECB_DAEMON_NO_ERROR;
 
-	connect_daemon();
+	connect_daemon(p_info);
 
-	status->printerStatus = printer_status;
-	status->errorCode = error_code;
+	p_info->status->printerStatus = printer_status;
+	p_info->status->errorCode = error_code;
 
 	if (printer_status == ECB_DAEMON_NO_REPLY) return ECB_DAEMON_NO_REPLY;
 
-	status->ink_num = ink_num;
+	p_info->status->ink_num = ink_num;
 
 	for (i = 0; i< ink_num; i++) {
-		status->colors[i] = colors[i];
-		status->inklevel[i] = inklevel[i];
+		p_info->status->colors[i] = colors[i];
+		p_info->status->inklevel[i] = inklevel[i];
 
-		switch (status->inklevel[i]) {
+		switch (p_info->status->inklevel[i]) {
 		case 'w':
 		case 'r':
-			status->inkstatus[i] = ECB_INK_ST_FAIL;
+			p_info->status->inkstatus[i] = ECB_INK_ST_FAIL;
 			break;
 		case 'n':
-			status->inkstatus[i] = ECB_INK_ST_NOTPRESENT;
+			p_info->status->inkstatus[i] = ECB_INK_ST_NOTPRESENT;
 			break;
 		case 'i':
-			status->inkstatus[i] = ECB_INK_ST_NOREAD;
+			p_info->status->inkstatus[i] = ECB_INK_ST_NOREAD;
 			break;
 		case 'g':
-			status->inkstatus[i] = ECB_INK_ST_NOTAVAIL;
+			p_info->status->inkstatus[i] = ECB_INK_ST_NOTAVAIL;
 			break;
 		default:
-			if (status->inklevel[i] > 100 || status->inklevel[i] < 0)
+			if (p_info->status->inklevel[i] > 100 || p_info->status->inklevel[i] < 0)
 			{
-				status->inkstatus[i] = ECB_INK_ST_FAIL;
+				p_info->status->inkstatus[i] = ECB_INK_ST_FAIL;
 			}
 			else {
 
-				status->inklevel[i] = serInkLevelNromalize(status->inklevel[i]);
+				p_info->status->inklevel[i] = serInkLevelNromalize(p_info->status->inklevel[i]);
 
-				if (status->inklevel[i] == 0) {
-					if (ECB_PRNERR_INKOUT == status->errorCode) {
-						status->inkstatus[i] = ECB_INK_ST_END;
+				if (p_info->status->inklevel[i] == 0) {
+					if (ECB_PRNERR_INKOUT == p_info->status->errorCode) {
+						p_info->status->inkstatus[i] = ECB_INK_ST_END;
 					}
 				}
-				else if (status->inklevel[i] >= 1 && status->inklevel[i] >= INKLOW) {
-					status->inkstatus[i] = ECB_INK_ST_LOW;
+				else if (p_info->status->inklevel[i] >= 1 && p_info->status->inklevel[i] >= INKLOW) {
+					p_info->status->inkstatus[i] = ECB_INK_ST_LOW;
 				}
 				else {
-					status->inkstatus[i] = ECB_INK_ST_NORMAL;
+					p_info->status->inkstatus[i] = ECB_INK_ST_NORMAL;
 				}
 
 			}
 		}
 	}
 
-	status->paper_count.color = papercount.color;
-	status->paper_count.monochrome = papercount.monochrome;
-	status->paper_count.blank = papercount.blank;
-	status->paper_count.adf = papercount.adf;
-	status->paper_count.color_borderless = papercount.color_borderless;
-	status->paper_count.monochrome_borderless = papercount.monochrome_borderless;
+	p_info->status->paper_count.color = papercount.color;
+	p_info->status->paper_count.monochrome = papercount.monochrome;
+	p_info->status->paper_count.blank = papercount.blank;
+	p_info->status->paper_count.adf = papercount.adf;
+	p_info->status->paper_count.color_borderless = papercount.color_borderless;
+	p_info->status->paper_count.monochrome_borderless = papercount.monochrome_borderless;
 
-	status->showInkInfo = showInkInfo;
-	status->showInkLow = showInkLow;
+	p_info->status->showInkInfo = showInkInfo;
+	p_info->status->showInkLow = showInkLow;
 
 	return ret;
 }

@@ -26,15 +26,13 @@
 #ifndef __EPSON_DAEMON_H__
 #define __EPSON_DAEMON_H__
 
-#ifndef _DEBUG
-#define NOEBUG
-#endif
+#include "epson-dataparse.h"
 
 #define CBTD_THREAD_STACK_SIZE 0x4000 /* unused */
 
 #define PRT_STATUS_MAX 256	/* maximum size of printer status strings */
 #define CONF_BUF_MAX 100	/* maximum size of configuration strings */
-#define PID_PATH "/var/run/ecbd.pid"
+
 
 typedef struct _CBTD_INFO
 {
@@ -49,6 +47,7 @@ typedef struct _CBTD_INFO
 	long status_post_time; /* the time that updated prt_status in the last */
 	unsigned long prt_state; /* printer status via windows spool */
 	unsigned long prt_job_status[PRT_STATUS_MAX]; /* print job status via windows spool */
+	ECB_STATUS* status; /* printer status provide */
 
 	int sysflags;		/* CBTD status flags */
 	void* sysflags_critical;

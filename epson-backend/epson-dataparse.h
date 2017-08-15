@@ -34,7 +34,6 @@ typedef ECB_INT32      ECB_BOOL;        /* Boolean type                         
 typedef ECB_INT32      ECB_ERR_CODE;    /* Error code for API's and routines                */
 typedef int            ECB_SOCKET;      /* socket discripter                                */
 
-
 typedef enum
 {
   /* from lib-l2/epson-escpr-err.h: enum EPS_PRINTER_STATUS */
@@ -51,6 +50,8 @@ typedef enum
   ECB_DAEMON_DEFAULT
 
 }ECB_PRINTER_STS;
+
+
 
 typedef enum
 {
@@ -185,6 +186,6 @@ typedef struct _tagECB_PRINTER_ {
 	ECB_INT32	language;
 } ECB_PRINTER;
 
-ECB_PRINTER_STS Get_Status (ECB_STATUS* status);
+ECB_PRINTER_STS Get_Status (P_CBTD_INFO);
 
 #endif /* __EPSON_DATAPARSE_H__ */
