@@ -37,10 +37,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "epson-hw.h"
 #include "epson-local.h"
-//#include "daemon_osdef.h"
-//#include "daemon_osfunc.h"
+#include "epson-hw.h"
 
 void ReadThread(LPVOID param);
 

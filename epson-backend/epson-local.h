@@ -27,9 +27,6 @@
 #define __EPSON_LOCAL_H__
 
 #include <Windows.h>
-//#include "epson-typedefs.h"
-
-#define	ECBTEG__
 
 /******************************************************************************\
 *                              SYMBOLIC CONSTANTS
@@ -213,7 +210,7 @@ int	Exit_Command(LPPORT pPort);
 int	Tx_ExitReply(LPPORT pPort);
 int	GetSocketID_Command(LPPORT pPort, LPBYTE lpName, int Size,
 	LPBYTE lpSocketID);
-int	GetServiceName_Command(LPPORT pPort, BYTE SID, LPBYTE lpNameBuf, int Size);
+int GetServiceName_Command(LPPORT pPort, BYTE SID, BYTE *lpNameBuf, int Size);
 int	Tx_EpsonPacking(LPPORT pPort);
 int	Tx_ErrorPacket(LPPORT pPort, BYTE SID, byte Error);
 

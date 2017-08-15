@@ -27,7 +27,6 @@
 #define __EPSON_HW_H__
 
 #include <Windows.h>
-//#include "daemon_osdef.h"
 
 /******************************************************************************\
 *                              SYMBOLIC CONSTANTS
