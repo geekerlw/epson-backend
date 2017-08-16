@@ -55,8 +55,6 @@ typedef enum {
 #define HIDE_INKINFO (0x01 << 0)
 #define HIDE_INKLOW  (0x01 << 1)
 
-extern int gettimeofday(struct timeval *tp, void *tzp);
-
 /*
  * get printer job status, success return true 
  */
@@ -716,7 +714,6 @@ void datatrans_thread(P_CBTD_INFO p_info)
 	if(hPrinter)
 		p_info->printer_handle = hPrinter;
 
-	//_DEBUG_MESSAGE_VAL("datatrans thread ID : ", (int)pthread_self());
 	_datatrans_lpr_flag = 0;
 
 	cargs.p_info = p_info;

@@ -145,8 +145,6 @@ static int sock_write(int fd, char* buf, int write_size)
 	return 1;
 }
 
-
-
 /* transmit packet */
 static void reply_send(int fd, char* buf, int size)
 {
@@ -165,50 +163,23 @@ static void reply_send(int fd, char* buf, int size)
 
 int SendCommand(char* pCmd, int nCmdSize)
 {
-	/* 
-	 * todo: linux sendcommand via fifo, windows maybe another way
-	 */
-/*	int res = STS_NO_ERROR;
-	char *p = NULL;
-	int fd;			/* Parallel device */
-/*	int wbytes;		/* Number of bytes written */
-/*
-	do {
-		if ((fd = open(FIFO_PATH, O_WRONLY | O_EXCL)) == -1) {
-			if (errno == EBUSY) {
-				//	            err_msg (MSGTYPE_INFO, "Backend port busy; will retry in 10 seconds...\n");
-				sleep(10);
-			}
-			else {
-				fprintf(stderr, "Unable to open Backend port device file. %s\n",
-					strerror(errno));
-				res = EPS_PRNERR_COMM;
-				break;
-			}
-		}
-	} while (fd < 0 && res == STS_NO_ERROR);
+	return 0;
+}
 
-	p = pCmd;
-	while (nCmdSize > 0 && res == STS_NO_ERROR) {
-		if ((wbytes = write(fd, p, nCmdSize)) < 0) {
-			if (errno == ENOTTY) {
-				wbytes = write(fd, p, nCmdSize);
-			}
-		}
+/* take out data division minute from packet */
+static int command_recv(int fd, char* cbuf, int* csize)
+{
 
-		if (wbytes < 0) {
-			//          err_msg (MSGTYPE_ERROR, "Unable to send print file to printer.");
-			break;
-		}
-		nCmdSize -= wbytes;
-		p += wbytes;
-	}
+	if (sock_read(fd, cbuf, PAC_HEADER_SIZE))
+		return 1;
 
+	if (strncmp(cbuf, COMMAND_PACKET_KEY, PACKET_KEY_LEN))
+		return 1;
 
-	if (fd > 0)	close(fd);
+	*csize = ((int)cbuf[3] << 8) + (int)cbuf[4];
 
-	return res;
-*/
+	if (sock_read(fd, cbuf, *csize))
+		return 1;
 	return 0;
 }
 
@@ -225,68 +196,34 @@ static int error_recept(int fd, int err_code)
 	return 0;
 }
 
-/* received a cancel command */
-static int cancel_recept(P_CBTD_INFO p_info, int fd)
+/* receive a status acquisition command */
+static int status_recept(P_CBTD_INFO p_info, int fd)
 {
-	/* In case of CL-700, need to transmit a "mo" command */
-#ifdef USE_MOTOROFF
-	char motoroff_command[] = { 'm', 'o', 0x01, 0x00, 0x01 };
-#endif
-	char reset_command[] = { 'r', 's', 0x01, 0x00, 0x01 };
-	char rbuf[REP_BUF_SIZE];
-	int rsize = REP_BUF_SIZE;
-	char* point;
-	int i;
+	if (p_info->prt_status_len == 0)
+		return 1;
 
-	set_sysflags(p_info, ST_JOB_CANCEL);
-	for (i = 0; i < 100; i++)
-	{
-		if (is_sysflags(p_info, ST_JOB_PRINTING))
-			usleep (10000);
-	}
-
-	Sleep(1000);
-
-	point = strstr(p_info->prt_status, "ER:");
-	if (point && (memcmp(point, "ER:04", 5) == 0)) /* paper jam ? */
-	{
-		write_prt_command(p_info, reset_command,
-			sizeof(reset_command), rbuf, &rsize);
-		rsize = REP_BUF_SIZE;
-
-#ifdef USE_MOTOROFF /* "mo" command */
-		write_prt_command(p_info, motoroff_command,
-			sizeof(motoroff_command), rbuf, &rsize);
-#endif
-	}
-	else
-	{
-#ifdef USE_MOTOROFF /* "mo" command */
-		write_prt_command(p_info, motoroff_command,
-			sizeof(motoroff_command), rbuf, &rsize);
-#endif
-		rsize = REP_BUF_SIZE;
-		write_prt_command(p_info, reset_command,
-			sizeof(reset_command), rbuf, &rsize);
-	}
-
-	/* todo: it use cups cmd here */
-	//	Cancel CUPS Jobs
-	system("cancel -a");
-
-	error_recept(fd, ERRPKT_NOREPLY);
-
+	reply_send(fd, p_info->prt_status, p_info->prt_status_len);
 	return 0;
 }
 
+/* received a printer status get command */
+static int prt_status_recept(P_CBTD_INFO p_info, int fd) {
 
+}
 
-/* received a cancel command (not D4) */
-static int cancel_nd4_recept(P_CBTD_INFO p_info, int fd)
-{
-	set_sysflags(p_info, ST_JOB_CANCEL);
-	error_recept(fd, ERRPKT_NOREPLY);
-	return 0;
+/* received a job status get command */
+static int job_status_recept(P_CBTD_INFO p_info, int fd) {
+
+}
+
+/* received a material status get command */
+static int material_status_recept(P_CBTD_INFO p_info, int fd) {
+
+}
+
+/* received a job cancel command */
+static int job_cancel_recept(P_CBTD_INFO p_info, int fd) {
+
 }
 
 /* received a nozzle check command */
@@ -332,17 +269,6 @@ static int getdeviceid_recept(P_CBTD_INFO p_info, int fd)
 	return 0;
 }
 
-/* receive a status acquisition command */
-static int status_recept(P_CBTD_INFO p_info, int fd)
-{
-	if (p_info->prt_status_len == 0)
-		return 1;
-
-	reply_send(fd, p_info->prt_status, p_info->prt_status_len);
-	return 0;
-}
-
-
 /* usual command reception */
 static int default_recept(P_CBTD_INFO p_info, int fd, char* cbuf, int csize)
 {
@@ -361,30 +287,13 @@ static int default_recept(P_CBTD_INFO p_info, int fd, char* cbuf, int csize)
 	return 0;
 }
 
-/* take out data division minute from packet */
-static int command_recv(int fd, char* cbuf, int* csize)
-{
-
-	if (sock_read(fd, cbuf, PAC_HEADER_SIZE))
-		return 1;
-
-	if (strncmp(cbuf, COMMAND_PACKET_KEY, PACKET_KEY_LEN))
-		return 1;
-
-	*csize = ((int)cbuf[3] << 8) + (int)cbuf[4];
-
-	if (sock_read(fd, cbuf, *csize))
-		return 1;
-	return 0;
-}
-
-
 /* handle the data which received */
 static int comserv_work(P_CBTD_INFO p_info, int fd)
 {
-	const char status_command[] = { 's', 't', 0x01, 0x00, 0x01 };
-	const char cancel_command[] = { 'c', 'a', 'n', 'c', 'e', 'l' };
-	const char cancel_nd4_command[] = { 'c', 'a', 'n', 'c', 'e', 'l', '_', 'n', 'd', '4' };
+	const char prt_status_command[] = { 'p', 'r', 't', 's', 't' };
+	const char job_status_command[] = { 'j', 'o', 'b', 's', 't' };
+	const char material_command[] = { 'm', 'a', 't', 'e', 'r', 'i', 'a', 'l' };
+	const char job_cancel_command[] = { 'j', 'o', 'b', 'c', 'a', 'n', 'c', 'e', 'l' };
 	const char nozzlecheck_command[] = { 'n', 'o', 'z', 'z', 'l', 'e', 'c', 'h', 'e', 'c', 'k' };
 	const char headcleaning_command[] = { 'h', 'e', 'a', 'd', 'c', 'l', 'e', 'a', 'n', 'i', 'n', 'g' };
 	const char getdeviceid_command[] = { 'g', 'e', 't', 'd', 'e', 'v', 'i', 'c', 'e', 'i', 'd' };
@@ -403,53 +312,50 @@ static int comserv_work(P_CBTD_INFO p_info, int fd)
 		return error_recept(fd, ERRPKT_UNKNOWN_PACKET);
 	}
 
-
-	/* acquire status */
-	if (memcmp(cbuf, status_command, sizeof(status_command)) == 0)
-	{
-		if (status_recept(p_info, fd))
+	/* acquire printer status */
+	if (memcmp(cbuf, prt_status_command, sizeof(prt_status_command))) {
+		if (prt_status_recept(p_info, fd))
 			err = 1;
 	}
 
-	/* stop printing (not D4) */
-	else if (memcmp(cbuf, cancel_nd4_command, sizeof(cancel_nd4_command)) == 0)
-	{
-		if (cancel_nd4_recept(p_info, fd))
+	/* acquire winspool print job status */
+	else if (memcmp(cbuf, job_status_command, sizeof(job_status_command))) {
+		if (job_status_recept(p_info, fd))
 			err = 1;
 	}
 
-	/* stop printing */
-	else if (memcmp(cbuf, cancel_command, sizeof(cancel_command)) == 0)
-	{
-		if (cancel_recept(p_info, fd))
+	/* acquire printer material status */
+	else if (memcmp(cbuf, material_command, sizeof(material_command))) {
+		if (material_status_recept(p_info, fd))
 			err = 1;
 	}
 
-	/* nozzle check */
-	else if (memcmp(cbuf, nozzlecheck_command, sizeof(nozzlecheck_command)) == 0)
-	{
+	/* acquire to stop print job */
+	else if (memcmp(cbuf, job_cancel_command, sizeof(job_cancel_command))) {
+		if (job_cancel_recept(p_info, fd))
+			err = 1;
+	}
+
+	/* acquire nozzle check */
+	else if (memcmp(cbuf, nozzlecheck_command, sizeof(nozzlecheck_command)) == 0) {
 		if (nozzlecheck_recept(p_info, fd))
 			err = 1;
 	}
 
-	/* head cleaning */
-	else if (memcmp(cbuf, headcleaning_command, sizeof(headcleaning_command)) == 0)
-	{
+	/* acquire head cleaning */
+	else if (memcmp(cbuf, headcleaning_command, sizeof(headcleaning_command)) == 0) {
 		if (headcleaning_recept(p_info, fd))
 			err = 1;
 	}
 
-	/* nozzle check */
-	else if (memcmp(cbuf, getdeviceid_command, sizeof(getdeviceid_command)) == 0)
-	{
+	/* acquire device info */
+	else if (memcmp(cbuf, getdeviceid_command, sizeof(getdeviceid_command)) == 0) {
 		if (getdeviceid_recept(p_info, fd))
 			err = 1;
 	}
 
 	/* others */
-	else
-	{
-
+	else {
 		if (default_recept(p_info, fd, cbuf, csize))
 			err = 1;
 	}
@@ -498,7 +404,6 @@ void comserv_thread(P_CBTD_INFO p_info)
 	int maxval, nclient;
 	CARGS cargs;
 
-	//_DEBUG_MESSAGE_VAL("Comserv thread ID : ", (int)pthread_self());
 	_comserv_first_flag = 1;
 
 	FD_ZERO (&sock_fds);
@@ -541,16 +446,6 @@ void comserv_thread(P_CBTD_INFO p_info)
 		/* Is daemon in the middle of process for end ? */
 		if (is_sysflags (p_info, ST_SYS_DOWN))
 			break;
-
-		if (p_info->need_update == 1 && is_sysflags(p_info, ST_PRT_CONNECT)) {
-			if (post_prt_status(p_info)) {
-				reset_sysflags(p_info, ST_PRT_CONNECT);
-			}
-			else {
-				ECB_PRINTER_STS ret = Get_Status(p_info);
-				p_info->need_update = 0;
-			}
-		}
 
 		for (fd = 0; fd < maxval + 1; fd++)
 		{
