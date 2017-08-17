@@ -496,7 +496,7 @@ static void ink_list_delete(InkList list)
 
 
 
-static void connect_daemon(P_CBTD_INFO p_info)
+static void parse_prt_status(P_CBTD_INFO p_info)
 {
 	/* Renewal of ink residual quantity */
 	printer_status = ReadStatuslogfile(p_info, &ink_list, &error_code);
@@ -524,7 +524,7 @@ ECB_PRINTER_STS Get_Status(P_CBTD_INFO p_info)
 
 	ECB_PRINTER_STS ret = ECB_DAEMON_NO_ERROR;
 
-	connect_daemon(p_info);
+	parse_prt_status(p_info);
 
 	p_info->status->printerStatus = printer_status;
 	p_info->status->errorCode = error_code;
