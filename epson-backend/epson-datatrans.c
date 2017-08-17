@@ -318,8 +318,6 @@ static size_t change_status_format(P_CBTD_INFO p_info, unsigned char *bdata, siz
 	/* Status Codes */
 	point = scan_bin_status(STBIN_ST, bdata, bsize);
 
-	if (is_sysflags(p_info, ST_JOB_PRINTING) && (point[2] == 4))
-		point[2] = 3;
 	if (point && count + 6 < csize) {
 		/* 2004.03.02 update "%2x" -> "%2X" */
 		sprintf(cdata + count, "ST:%02X;", (int)point[2]);
