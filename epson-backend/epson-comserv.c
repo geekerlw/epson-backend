@@ -201,12 +201,12 @@ static int prt_status_recept(P_CBTD_INFO p_info, int fd) {
 	if (p_info->prt_status_len == 0)
 		return 1;
 
-	char prt_st_buf[2] = { 0 };
+	char rbuf[2] = { 0 };
 
-	prt_st_buf[0] = p_info->status->printerStatus;
-	prt_st_buf[1] = p_info->prt_state;
+	rbuf[0] = p_info->status->printerStatus;
+	rbuf[1] = p_info->prt_state;
 
-	reply_send(fd, prt_st_buf, sizeof(prt_st_buf));
+	reply_send(fd, rbuf, sizeof(rbuf));
 	return 0;
 }
 
@@ -221,7 +221,12 @@ static int job_status_recept(P_CBTD_INFO p_info, int fd) {
 
 /* received a material status get command */
 static int material_status_recept(P_CBTD_INFO p_info, int fd) {
-	
+	char rbuf[1] = { 0 };
+	if (p_info->status->showInkLow)
+		rbuf[0] = 1;
+
+	reply_send(fd, rbuf, sizeof(rbuf));
+	return 0;
 }
 
 /* received a job cancel command */
