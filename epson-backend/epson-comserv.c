@@ -196,29 +196,32 @@ static int error_recept(int fd, int err_code)
 	return 0;
 }
 
-/* receive a status acquisition command */
-static int status_recept(P_CBTD_INFO p_info, int fd)
-{
+/* received a printer status get command */
+static int prt_status_recept(P_CBTD_INFO p_info, int fd) {
 	if (p_info->prt_status_len == 0)
 		return 1;
 
-	reply_send(fd, p_info->prt_status, p_info->prt_status_len);
+	char prt_st_buf[2] = { 0 };
+
+	prt_st_buf[0] = p_info->status->printerStatus;
+	prt_st_buf[1] = p_info->prt_state;
+
+	reply_send(fd, prt_st_buf, sizeof(prt_st_buf));
 	return 0;
-}
-
-/* received a printer status get command */
-static int prt_status_recept(P_CBTD_INFO p_info, int fd) {
-
 }
 
 /* received a job status get command */
 static int job_status_recept(P_CBTD_INFO p_info, int fd) {
+	if (p_info->prt_job_status_len == 0)
+		return 1;
 
+	reply_send(fd, p_info->prt_job_status, p_info->prt_job_status_len);
+	return 0;
 }
 
 /* received a material status get command */
 static int material_status_recept(P_CBTD_INFO p_info, int fd) {
-
+	
 }
 
 /* received a job cancel command */

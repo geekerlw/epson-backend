@@ -52,6 +52,8 @@ typedef struct _CBTD_INFO
 	long status_post_time; /* the time that updated prt_status in the last */
 	unsigned long prt_state; /* printer status via windows spool */
 	unsigned long prt_job_status[PRT_STATUS_MAX]; /* print job status via windows spool */
+	int prt_job_status_len; /*size of printer job status strings */
+
 	ECB_STATUS* status; /* printer status provide */
 
 	int sysflags;		/* CBTD status flags */
