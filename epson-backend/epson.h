@@ -63,6 +63,8 @@ typedef struct _CBTD_INFO
 	Not need to manage it with semaphore. */
 	void* datatrans_thread;
 	int datatrans_thread_status;
+	void* dataparse_thread;
+	int dataparse_thread_status;
 	void* comserv_thread;
 	int comserv_thread_status;
 
@@ -103,6 +105,7 @@ int gettimeofday(struct timeval *tp, void *tzp);
 void end_cbtd(P_CBTD_INFO);
 int end_epson_cbt(P_CBTD_INFO);
 void datatrans_thread(P_CBTD_INFO);
+void dataparse_thread(P_CBTD_INFO);
 void comserv_thread(P_CBTD_INFO);
 ECB_PRINTER_STS Get_Status(P_CBTD_INFO);
 int write_prt_command(P_CBTD_INFO, char*, int, char*, int*);

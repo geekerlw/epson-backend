@@ -718,6 +718,7 @@ void datatrans_thread(P_CBTD_INFO p_info)
 	cargs.p_max = &p_max;
 	pthread_cleanup_push(datatrans_cleanup, (void *)&cargs);
 
+
 	for (;;)
 	{
 		/* Is daemon in the middle of process for end ? */
@@ -743,8 +744,6 @@ void datatrans_thread(P_CBTD_INFO p_info)
 		{
 			datatrans_work(p_info);	
 		}
-
-		//reset_sysflags(p_info, ST_JOB_RECV);
 		
 		reset_sysflags(p_info, ST_JOB_PRINTING);
 

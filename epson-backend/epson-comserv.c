@@ -203,8 +203,8 @@ static int prt_status_recept(P_CBTD_INFO p_info, int fd) {
 
 	char rbuf[2] = { 0 };
 
-	rbuf[0] = p_info->status->printerStatus;
-	rbuf[1] = p_info->prt_state;
+	rbuf[0] = (char)p_info->status->printerStatus;
+	rbuf[1] = (char)p_info->prt_state;
 
 	reply_send(fd, rbuf, sizeof(rbuf));
 	return 0;
@@ -215,7 +215,7 @@ static int job_status_recept(P_CBTD_INFO p_info, int fd) {
 	if (p_info->prt_job_status_len == 0)
 		return 1;
 
-	reply_send(fd, p_info->prt_job_status, p_info->prt_job_status_len);
+	reply_send(fd, (char *)p_info->prt_job_status, p_info->prt_job_status_len);
 	return 0;
 }
 

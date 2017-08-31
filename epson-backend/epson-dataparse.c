@@ -20,6 +20,12 @@
 #include <time.h>
 #include <string.h>
 #include "epson.h"
+#include "epson-thread.h"
+
+#ifndef _CRT_NO_TIME_T
+#define HAVE_STRUCT_TIMESPEC
+#include <pthread.h>
+#endif
 
 #define TIME_OUT 3
 #define EPS_INK_NORMALIZE_LEVEL (5)
@@ -587,4 +593,58 @@ ECB_PRINTER_STS Get_Status(P_CBTD_INFO p_info)
 	p_info->status->showInkLow = showInkLow;
 
 	return ret;
+}
+
+/*  end of thread */
+static void dataparse_cleanup(void* data)
+{
+	P_CARGS p_cargs = (P_CARGS)data;
+	int fd = *(p_cargs->p_max);
+
+	//close(fd);
+	if (!is_sysflags(p_cargs->p_info, ST_SYS_DOWN))
+		set_sysflags(p_cargs->p_info, ST_SYS_DOWN);
+
+	p_cargs->p_info->dataparse_thread_status = THREAD_DOWN;
+	printf("Data parser thread ...down\n");
+	return;
+}
+
+/* Thread to parse printer status data */
+void dataparse_thread(P_CBTD_INFO p_info) {
+	CARGS cargs;
+	int p_max = 0;
+	int set_flags, reset_flags;
+
+	cargs.p_info = p_info;
+	cargs.p_max = &p_max;
+	pthread_cleanup_push(dataparse_cleanup, (void *)&cargs);
+
+	for (;;) {
+
+		/* Is daemon in the middle of process for end ? */
+		if (is_sysflags(p_info, ST_SYS_DOWN))
+			break;
+
+		p_info->dataparse_thread_status = THREAD_RUN;
+
+		set_flags = 0;
+		reset_flags = ST_PRT_CONNECT | ST_SYS_DOWN | ST_JOB_CANCEL;
+		wait_sysflags(p_info, set_flags, reset_flags, 0, WAIT_SYS_OR);
+
+		if (is_sysflags(p_info, ST_PRT_CONNECT)) {
+			if (post_prt_status(p_info)) {
+				reset_sysflags(p_info, ST_PRT_CONNECT);
+			}
+			else {
+				Get_Status(p_info);
+			}
+		}
+		
+		if (is_sysflags(p_info, ST_SYS_DOWN))
+			break;
+	}
+
+	pthread_cleanup_pop(1);
+	return;
 }

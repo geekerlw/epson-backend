@@ -220,11 +220,17 @@ static void init_cbtd(P_CBTD_INFO p_info)
 		&& p_info->ecbt_accsess_critical != NULL);
 
 	p_info->datatrans_thread_status = THREAD_RUN;
+	p_info->dataparse_thread_status = THREAD_RUN;
 	p_info->comserv_thread_status = THREAD_RUN;
 
 	p_info->datatrans_thread
 		= init_thread(CBTD_THREAD_STACK_SIZE,
 		(void *)datatrans_thread,
+			(void *)p_info);
+
+	p_info->dataparse_thread
+		= init_thread(CBTD_THREAD_STACK_SIZE,
+		(void *)dataparse_thread,
 			(void *)p_info);
 
 	p_info->comserv_thread
@@ -233,7 +239,8 @@ static void init_cbtd(P_CBTD_INFO p_info)
 			(void *)p_info);
 
 	assert(p_info->datatrans_thread != NULL
-		&& p_info->comserv_thread != NULL);
+		&& p_info->comserv_thread != NULL
+		&& p_info->dataparse_thread != NULL);
 
 	return;
 }
@@ -243,6 +250,9 @@ void end_cbtd(P_CBTD_INFO p_info)
 {
 	if (p_info->datatrans_thread)
 		delete_thread(p_info->datatrans_thread);
+
+	if (p_info->dataparse_thread)
+		delete_thread(p_info->dataparse_thread);
 
 	if (p_info->comserv_thread)
 		delete_thread(p_info->comserv_thread);
@@ -274,6 +284,7 @@ static void cbtd_control(void)
 		/* turn into the main loop */
 		for (;;)
 		{
+			break;
 			set_flags = 0;
 			reset_flags = ST_SYS_DOWN | ST_CLIENT_CONNECT | ST_JOB_CANCEL;
 			if (wait_sysflags(&info, set_flags, reset_flags, 5, WAIT_SYS_OR) == 0)
@@ -299,13 +310,13 @@ static void cbtd_control(void)
 			{
 				set_flags = ST_CLIENT_CONNECT | ST_JOB_CANCEL;
 				reset_flags = 0;
-				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_AND) == 0)
-					break;
+				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_AND) == 0){}
+					//break;
 
 				set_flags = ST_PRT_CONNECT;
 				reset_flags = ST_SYS_DOWN;
-				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_OR) == 0)
-					break;
+				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_OR) == 0){}
+					//break;
 			}
 		}
 		end_epson_cbt(&info);
@@ -325,7 +336,8 @@ static void cbtd_control(void)
 
 	/* wait for end of other thread */
 	while (info.datatrans_thread_status != THREAD_DOWN
-		|| info.comserv_thread_status != THREAD_DOWN)
+		|| info.comserv_thread_status != THREAD_DOWN
+		|| info.dataparse_thread_status != THREAD_DOWN)
 		Sleep(1000);
 
 	end_cbtd(&info);
