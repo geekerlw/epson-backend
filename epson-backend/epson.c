@@ -302,8 +302,11 @@ static void cbtd_control(void)
 		/* initialize communication */
 		if (init_epson_cbt(&info) == 0)
 		{
-			/* thread starting */
-			set_sysflags(&info, ST_PRT_CONNECT);
+			/* run post_prt_status before threads start */
+			if(post_prt_status(&info) == 0){
+				/* thread starting */
+				set_sysflags(&info, ST_PRT_CONNECT);
+			}
 
 			/* check status */
 			for (;;)
