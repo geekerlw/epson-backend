@@ -107,7 +107,7 @@ int end_epson_cbt(P_CBTD_INFO);
 void datatrans_thread(P_CBTD_INFO);
 void dataparse_thread(P_CBTD_INFO);
 void comserv_thread(P_CBTD_INFO);
-ECB_PRINTER_STS Get_Status(P_CBTD_INFO);
+ECB_PRINTER_STS parse_prt_status(P_CBTD_INFO);
 int write_prt_command(P_CBTD_INFO, char*, int, char*, int*);
 int post_prt_status(P_CBTD_INFO);
 EPS_ERR_CODE epsMakeMainteCmd(

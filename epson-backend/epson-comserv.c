@@ -322,25 +322,25 @@ static int comserv_work(P_CBTD_INFO p_info, int fd)
 	}
 
 	/* acquire printer status */
-	if (memcmp(cbuf, prt_status_command, sizeof(prt_status_command))) {
+	if (memcmp(cbuf, prt_status_command, sizeof(prt_status_command)) == 0) {
 		if (prt_status_recept(p_info, fd))
 			err = 1;
 	}
 
 	/* acquire winspool print job status */
-	else if (memcmp(cbuf, job_status_command, sizeof(job_status_command))) {
+	else if (memcmp(cbuf, job_status_command, sizeof(job_status_command)) == 0) {
 		if (job_status_recept(p_info, fd))
 			err = 1;
 	}
 
 	/* acquire printer material status */
-	else if (memcmp(cbuf, material_command, sizeof(material_command))) {
+	else if (memcmp(cbuf, material_command, sizeof(material_command)) == 0) {
 		if (material_status_recept(p_info, fd))
 			err = 1;
 	}
 
 	/* acquire to stop print job */
-	else if (memcmp(cbuf, job_cancel_command, sizeof(job_cancel_command))) {
+	else if (memcmp(cbuf, job_cancel_command, sizeof(job_cancel_command)) == 0) {
 		if (job_cancel_recept(p_info, fd))
 			err = 1;
 	}

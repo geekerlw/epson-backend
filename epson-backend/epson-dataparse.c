@@ -502,7 +502,7 @@ static void ink_list_delete(InkList list)
 
 
 
-static void parse_prt_status(P_CBTD_INFO p_info)
+static void get_raw_status(P_CBTD_INFO p_info)
 {
 	/* Renewal of ink residual quantity */
 	printer_status = ReadStatuslogfile(p_info, &ink_list, &error_code);
@@ -517,7 +517,7 @@ static void parse_prt_status(P_CBTD_INFO p_info)
 /* -----------------------------------------------------------------------------*/
 
 
-ECB_PRINTER_STS Get_Status(P_CBTD_INFO p_info)
+ECB_PRINTER_STS parse_prt_status(P_CBTD_INFO p_info)
 {
 
 	int i;
@@ -530,7 +530,7 @@ ECB_PRINTER_STS Get_Status(P_CBTD_INFO p_info)
 
 	ECB_PRINTER_STS ret = ECB_DAEMON_NO_ERROR;
 
-	parse_prt_status(p_info);
+	get_raw_status(p_info);
 
 	p_info->status->printerStatus = printer_status;
 	p_info->status->errorCode = error_code;
@@ -637,7 +637,7 @@ void dataparse_thread(P_CBTD_INFO p_info) {
 				reset_sysflags(p_info, ST_PRT_CONNECT);
 			}
 			else {
-				Get_Status(p_info);
+				parse_prt_status(p_info);
 			}
 		}
 		
