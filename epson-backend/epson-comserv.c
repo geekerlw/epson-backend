@@ -207,25 +207,44 @@ static int prt_status_recept(P_CBTD_INFO p_info, int fd) {
 	rbuf[1] = (char)p_info->prt_state;
 
 	reply_send(fd, rbuf, sizeof(rbuf));
+	printf("send a prt_status_buf from sock, size: %d\n", sizeof(rbuf));
 	return 0;
 }
 
 /* received a job status get command */
 static int job_status_recept(P_CBTD_INFO p_info, int fd) {
-	if (p_info->prt_job_status_len == 0)
-		return 1;
+	char rbuf[1] = { 0 };
+	if (p_info->prt_job_status_len == 0) {
+		reply_send(fd, rbuf, sizeof(rbuf));
+		printf("no prt job status, reply a job status command: %d\n", sizeof(rbuf));
+		//return 1;
+	}
+	else {
+		reply_send(fd, (char *)p_info->prt_job_status, p_info->prt_job_status_len);
+		printf("reply a job status command: %d\n", p_info->prt_job_status_len);
+	}
 
-	reply_send(fd, (char *)p_info->prt_job_status, p_info->prt_job_status_len);
 	return 0;
 }
 
 /* received a material status get command */
 static int material_status_recept(P_CBTD_INFO p_info, int fd) {
-	char rbuf[1] = { 0 };
-	if (p_info->status->showInkLow)
-		rbuf[0] = 1;
+	char rbuf[256];
+	int rsize = 0;
+
+	if (p_info->status->ink_num <= 0)
+		return 1;
+
+	int nums = p_info->status->ink_num;
+	rbuf[0] = (char)nums;
+
+	for (int i = 0; i < p_info->status->ink_num; i++) {
+		rbuf[i + 1] = (char)p_info->status->colors[i];
+		rbuf[i + 1 + nums] = (char)p_info->status->inklevel[i];
+	}
 
 	reply_send(fd, rbuf, sizeof(rbuf));
+	printf("reply a meterial status, size: %d\n", sizeof(rbuf));
 	return 0;
 }
 
@@ -323,6 +342,7 @@ static int comserv_work(P_CBTD_INFO p_info, int fd)
 
 	/* acquire printer status */
 	if (memcmp(cbuf, prt_status_command, sizeof(prt_status_command)) == 0) {
+		printf("recv a prt_status_command\n");
 		if (prt_status_recept(p_info, fd))
 			err = 1;
 	}
@@ -500,6 +520,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 					}
 					else {
 						/* receive a message */
+						printf("recv a message in comserv_thread\n");
 						if (comserv_work (p_info, fd))	
 							reset_sysflags (p_info, ST_PRT_CONNECT);
 					}

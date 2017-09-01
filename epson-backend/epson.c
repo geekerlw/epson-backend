@@ -308,6 +308,8 @@ static void cbtd_control(void)
 				set_sysflags(&info, ST_PRT_CONNECT);
 			}
 
+			set_sysflags(&info, ST_PRT_CONNECT);
+
 			/* check status */
 			for (;;)
 			{
@@ -315,7 +317,6 @@ static void cbtd_control(void)
 				reset_flags = 0;
 				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_AND) == 0){}
 					//break;
-
 				set_flags = ST_PRT_CONNECT;
 				reset_flags = ST_SYS_DOWN;
 				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_OR) == 0){}
