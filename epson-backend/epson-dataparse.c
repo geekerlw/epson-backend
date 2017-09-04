@@ -614,7 +614,6 @@ static void dataparse_cleanup(void* data)
 void dataparse_thread(P_CBTD_INFO p_info) {
 	CARGS cargs;
 	int p_max = 0;
-	int run_post = 1;
 	int set_flags, reset_flags;
 
 	cargs.p_info = p_info;
@@ -632,15 +631,14 @@ void dataparse_thread(P_CBTD_INFO p_info) {
 		reset_flags = ST_PRT_CONNECT | ST_SYS_DOWN | ST_JOB_CANCEL;
 		wait_sysflags(p_info, set_flags, reset_flags, 0, WAIT_SYS_OR);
 
-		if (is_sysflags(p_info, ST_PRT_CONNECT) && run_post == 1) {
+		if (is_sysflags(p_info, ST_PRT_CONNECT) && p_info->need_update == 1) {
 			printf("run post prt status in dataparse\n");
 			if (post_prt_status(p_info)) {
-				//reset_sysflags(p_info, ST_PRT_CONNECT);
-				/* do nothing here */
+				reset_sysflags(p_info, ST_PRT_CONNECT);
 			}
 			else {
 				parse_prt_status(p_info);
-				run_post = 0;
+				p_info->need_update = 0;
 			}
 		}
 		

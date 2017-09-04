@@ -257,14 +257,19 @@ static int job_cancel_recept(P_CBTD_INFO p_info, int fd) {
 /* received a nozzle check command */
 static int nozzlecheck_recept(P_CBTD_INFO p_info, int fd)
 {
-
 	char buffer[256];
-	int bufsize;
+	int bufsize, err;
 	epsMakeMainteCmd(EPS_MNT_NOZZLE, buffer, &bufsize);
 
-	SendCommand(buffer, bufsize);
+	open_port_channel(p_info, SID_DATA);
+	enter_critical(p_info->ecbt_accsess_critical);
+	err = write_to_prt(p_info, SID_DATA, buffer, &bufsize);
+	leave_critical(p_info->ecbt_accsess_critical);
+	close_port_channel(p_info, SID_DATA);
 
-	error_recept(fd, ERRPKT_NOREPLY);
+	err == 0 ? ERRPKT_NOREPLY : err;
+
+	error_recept(fd, err);
 
 	return 0;
 }
@@ -272,14 +277,19 @@ static int nozzlecheck_recept(P_CBTD_INFO p_info, int fd)
 /* received a head cleaning command */
 static int headcleaning_recept(P_CBTD_INFO p_info, int fd)
 {
-
 	char buffer[256];
-	int bufsize;
+	int bufsize, err;
 	epsMakeMainteCmd(EPS_MNT_CLEANING, buffer, &bufsize);
 
-	SendCommand(buffer, bufsize);
+	open_port_channel(p_info, SID_DATA);
+	enter_critical(p_info->ecbt_accsess_critical);
+	err = write_to_prt(p_info, SID_DATA, buffer, &bufsize);
+	leave_critical(p_info->ecbt_accsess_critical);
+	close_port_channel(p_info, SID_DATA);
 
-	error_recept(fd, ERRPKT_NOREPLY);
+	err == 0 ? ERRPKT_NOREPLY : err;
+
+	error_recept(fd, err);
 
 	return 0;
 }

@@ -666,7 +666,6 @@ static void datatrans_work(P_CBTD_INFO p_info)
 
 		/* if job has any error, break out */
 		if (IsPrinterError((HANDLE)(p_info->printer_handle), &(DWORD)p_info->prt_state, p_info->prt_job_status, &jobNums)) {	
-			p_info->need_update = 1;
 			set_sysflags(p_info, ST_PRT_ERROR);
 			//break;
 		}
