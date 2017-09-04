@@ -284,7 +284,6 @@ static void cbtd_control(void)
 		/* turn into the main loop */
 		for (;;)
 		{
-			break;
 			set_flags = 0;
 			reset_flags = ST_SYS_DOWN | ST_CLIENT_CONNECT | ST_JOB_CANCEL;
 			if (wait_sysflags(&info, set_flags, reset_flags, 5, WAIT_SYS_OR) == 0)
@@ -315,12 +314,12 @@ static void cbtd_control(void)
 			{
 				set_flags = ST_CLIENT_CONNECT | ST_JOB_CANCEL;
 				reset_flags = 0;
-				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_AND) == 0){}
-					//break;
+				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_AND) == 0)
+					break;
 				set_flags = ST_PRT_CONNECT;
 				reset_flags = ST_SYS_DOWN;
-				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_OR) == 0){}
-					//break;
+				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_OR) == 0)
+					break;
 			}
 		}
 		end_epson_cbt(&info);

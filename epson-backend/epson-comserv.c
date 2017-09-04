@@ -529,8 +529,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 							reset_sysflags (p_info, ST_CLIENT_CONNECT);
 					}
 					else {
-						/* receive a message */
-						printf("recv a message in comserv_thread\n");
+						/* receive a message */						
 						if (comserv_work (p_info, fd))	
 							reset_sysflags (p_info, ST_PRT_CONNECT);
 					}
