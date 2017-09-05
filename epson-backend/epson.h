@@ -110,6 +110,7 @@ void comserv_thread(P_CBTD_INFO);
 ECB_PRINTER_STS parse_prt_status(P_CBTD_INFO);
 int write_prt_command(P_CBTD_INFO, char*, int, char*, int*);
 int post_prt_status(P_CBTD_INFO);
+int cancel_prt_job(HANDLE hPrinter);
 EPS_ERR_CODE epsMakeMainteCmd(
 	EPS_INT32		cmd,
 	EPS_UINT8*		buffer,

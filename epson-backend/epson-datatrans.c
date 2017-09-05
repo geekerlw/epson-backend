@@ -190,6 +190,25 @@ error:
 	return TRUE;
 }
 
+/* cancel print jobs, success return true */
+BOOL cancel_prt_job(HANDLE hPrinter) {
+	JOB_INFO_2	*pJobs;
+	DWORD cJobs, dwPrinterStatus;
+	/*
+	*  Get the state information for the Printer Queue and
+	*  the jobs in the Printer Queue.
+	*/
+	if (!GetJobs(hPrinter, &pJobs, &cJobs, &dwPrinterStatus))
+		return FALSE;
+
+	if (cJobs) {
+		for (DWORD i = 0; i < cJobs; i++)
+			SetJob(hPrinter, pJobs[i].JobId, 2, (LPBYTE)&pJobs[i], JOB_CONTROL_DELETE);
+	}
+
+	return TRUE;
+}
+
 /* transmit a command to a printer and receive reply */
 int write_prt_command(P_CBTD_INFO p_info, char* com_buf,
 	int com_size, char* rep_buf, int* rep_size)

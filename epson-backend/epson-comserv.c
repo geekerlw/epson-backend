@@ -250,8 +250,11 @@ static int material_status_recept(P_CBTD_INFO p_info, int fd) {
 
 /* received a job cancel command */
 static int job_cancel_recept(P_CBTD_INFO p_info, int fd) {
-	/* todo: recv a job cancel require, maybe use setJobs */
-	return 0;
+	BOOL ret = cancel_prt_job(p_info->printer_handle);
+	if (ret) {
+		return 0;
+	}
+	return 1;
 }
 
 /* received a nozzle check command */
