@@ -209,38 +209,12 @@ BOOL cancel_prt_job(HANDLE hPrinter) {
 	return TRUE;
 }
 
-/* execute a cmd*/
-int exec_cmdline(char* cmd_str)
-{
-	pid_t status;
-
-	if (cmd_str == NULL)
-		return -1;
-	status = system(cmd_str);
-	if (status == -1) {
-		return -1;
-	} 
-	else {
-		if (WEXITSTATUS(status) != 0 && WEXITSTATUS(status) != 0) {
-			return -1;
-		}
-	}
-	return 0;
-}
-
 /* print file by given path */
-static int epson_print_file(P_CBTD_INFO p_info) {
+static void epson_print_file(P_CBTD_INFO p_info) {
 	char cmd[256];
 
-	if (p_info->file_path == NULL)
-		return -1;
-
 	sprintf(cmd, "rundll32 shimgvw.dll,ImageView_PrintTo /pt %s %s", p_info->file_path, p_info->printer_name);
-	if (exec_cmdline(cmd)) {
-		return -2;
-	}
-
-	return 0;
+	system(cmd);
 }
 
 /* transmit a command to a printer and receive reply */
