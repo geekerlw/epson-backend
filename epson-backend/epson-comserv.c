@@ -198,18 +198,19 @@ static int error_recept(int fd, int err_code)
 
 /* received a print file command */
 static int prt_file_recept(P_CBTD_INFO p_info, char *cbuf, int csize, int fd) {
-	const char prt_file_command[] = { 'p', 'r', 't', 'f', 'i', 'l', 'e' };
+	const char prt_file_header[] = { 'p', 'r', 't', 'f', 'i', 'l', 'e' };
 	char file[COM_BUF_SIZE];
-	int header_size = sizeof(prt_file_command);
+	int header_size = sizeof(prt_file_header);
 
 	for(int i = 0; i < csize - header_size; i++) {
-		file[i] = cbuf[i + sizeof(header_size)];
+		file[i] = cbuf[i + header_size];
 	}
 
 	p_info->file_path = (char *)malloc(sizeof(char));
 	p_info->file_path = file;
 	set_sysflags(p_info, ST_JOB_RECV);
 	
+	return 0;
 }
 
 /* received a printer status get command */
