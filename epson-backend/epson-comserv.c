@@ -43,6 +43,7 @@
 #define SOCK_ACCSESS_WAIT_MAX 20
 /* command packet key word */
 static const char COMMAND_PACKET_KEY[] = "pcp";
+
 /* length of packet key word */
 #define PACKET_KEY_LEN 3
 
@@ -50,6 +51,7 @@ static const char COMMAND_PACKET_KEY[] = "pcp";
 #define PAC_HEADER_SIZE 5	/* size of packet header */
 #define REP_BUF_SIZE  256	/* maximum size of reply buffer */
 
+static char file_to_prt[COM_BUF_SIZE];
 static int _comserv_first_flag;
 
 enum _ERROR_PACKET_NUMBERS {
@@ -199,15 +201,14 @@ static int error_recept(int fd, int err_code)
 /* received a print file command */
 static int prt_file_recept(P_CBTD_INFO p_info, char *cbuf, int csize, int fd) {
 	const char prt_file_header[] = { 'p', 'r', 't', 'f', 'i', 'l', 'e' };
-	char file[COM_BUF_SIZE];
 	int header_size = sizeof(prt_file_header);
 
 	for(int i = 0; i < csize - header_size; i++) {
-		file[i] = cbuf[i + header_size];
+		file_to_prt[i] = cbuf[i + header_size];
 	}
 
 	p_info->file_path = (char *)malloc(sizeof(char));
-	p_info->file_path = file;
+	p_info->file_path = file_to_prt;
 	set_sysflags(p_info, ST_JOB_RECV);
 	
 	return 0;
@@ -374,6 +375,8 @@ static int comserv_work(P_CBTD_INFO p_info, int fd)
 	/* acquire print a file */
 	if (memcmp(cbuf, prt_file_command, sizeof(prt_file_command)) == 0) {
 		printf("recv a print file command\n");
+		/* clear global file path data */
+		memset(file_to_prt, 0, sizeof(file_to_prt));
 		if (prt_file_recept(p_info, cbuf, csize, fd))
 			err = 1;
 	}

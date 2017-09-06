@@ -213,7 +213,7 @@ BOOL cancel_prt_job(HANDLE hPrinter) {
 static void epson_print_file(P_CBTD_INFO p_info) {
 	char cmd[256];
 
-	sprintf(cmd, "rundll32 shimgvw.dll,ImageView_PrintTo /pt %s %s", p_info->file_path, p_info->printer_name);
+	sprintf(cmd, "rundll32 shimgvw.dll,ImageView_PrintTo /pt \"%s\" \"%s\"", p_info->file_path, p_info->printer_name);
 	system(cmd);
 }
 

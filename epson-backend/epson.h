@@ -42,7 +42,7 @@
 
 typedef struct _CBTD_INFO
 {
-	char printer_name[CONF_BUF_MAX]; /* the printer title that is set with lpr */
+	char* printer_name; /* the printer name */
 	char devprt_path[CONF_BUF_MAX]; /* open device path */
 	char* file_path; /* the file path to print */
 	unsigned int comsock_port; /* INET socket port */

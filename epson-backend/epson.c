@@ -206,6 +206,7 @@ static void init_cbtd(P_CBTD_INFO p_info)
 {
 	memset(p_info, 0, sizeof(CBTD_INFO));
 	p_info->status = (ECB_STATUS *)malloc(sizeof(ECB_STATUS));
+	p_info->printer_name = (char *)malloc(sizeof(char));
 	p_info->file_path = NULL;
 
 	p_info->comsock_port = DAEMON_PORT;
@@ -277,7 +278,9 @@ static void cbtd_control(void)
 	CBTD_INFO info;
 	int set_flags, reset_flags;
 
+	char printer[] = "EPSON R330 Series";
 	init_cbtd(&info);
+	info.printer_name = printer;
 	//sig_set();
 
 	while (!is_sysflags(&info, ST_SYS_DOWN))
