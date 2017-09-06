@@ -631,7 +631,7 @@ void dataparse_thread(P_CBTD_INFO p_info) {
 		reset_flags = ST_PRT_CONNECT | ST_SYS_DOWN | ST_JOB_CANCEL;
 		wait_sysflags(p_info, set_flags, reset_flags, 0, WAIT_SYS_OR);
 
-		if (is_sysflags(p_info, ST_PRT_CONNECT) && p_info->need_update == 1) {
+		if (p_info->need_update == 1 && !is_sysflags(p_info, ST_JOB_PRINTING)) {
 			printf("run post prt status in dataparse\n");
 			if (post_prt_status(p_info)) {
 				reset_sysflags(p_info, ST_PRT_CONNECT);

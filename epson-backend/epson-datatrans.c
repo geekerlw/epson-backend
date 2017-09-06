@@ -209,6 +209,40 @@ BOOL cancel_prt_job(HANDLE hPrinter) {
 	return TRUE;
 }
 
+/* execute a cmd*/
+int exec_cmdline(char* cmd_str)
+{
+	pid_t status;
+
+	if (cmd_str == NULL)
+		return -1;
+	status = system(cmd_str);
+	if (status == -1) {
+		return -1;
+	} 
+	else {
+		if (WEXITSTATUS(status) != 0 && WEXITSTATUS(status) != 0) {
+			return -1;
+		}
+	}
+	return 0;
+}
+
+/* print file by given path */
+static int epson_print_file(P_CBTD_INFO p_info) {
+	char cmd[256];
+
+	if (p_info->file_path == NULL)
+		return -1;
+
+	sprintf(cmd, "rundll32 shimgvw.dll,ImageView_PrintTo /pt %s %s", p_info->file_path, p_info->printer_name);
+	if (exec_cmdline(cmd)) {
+		return -2;
+	}
+
+	return 0;
+}
+
 /* transmit a command to a printer and receive reply */
 int write_prt_command(P_CBTD_INFO p_info, char* com_buf,
 	int com_size, char* rep_buf, int* rep_size)
@@ -686,7 +720,7 @@ static void datatrans_work(P_CBTD_INFO p_info)
 		/* if job has any error, break out */
 		if (IsPrinterError((HANDLE)(p_info->printer_handle), &(DWORD)p_info->prt_state, p_info->prt_job_status, &jobNums)) {	
 			set_sysflags(p_info, ST_PRT_ERROR);
-			//break;
+			break;
 		}
 
 		/* no job in panel, break out */
@@ -745,18 +779,33 @@ void datatrans_thread(P_CBTD_INFO p_info)
 
 		p_info->datatrans_thread_status = THREAD_RUN;
 
-		/* 
-		 * todo: print job printing state may set when a task is create
-		 * we need to wait a ST_JOB_PRINTING here. The state may set by
-		 * comserv thread when a print job create by upsteam, send a sock
-		 * command to me.
-		 */
-		set_sysflags(p_info, ST_JOB_PRINTING);
-
+		/*
+		* todo: print job printing state may set when a task is create
+		* we need to wait a ST_JOB_PRINTING here. The state may set by
+		* comserv thread when a print job create by upsteam, send a sock
+		* command to me.
+		*/
+		/* wait for a printer connect signal */
 		set_flags = 0;
 		reset_flags = ST_PRT_CONNECT | ST_SYS_DOWN | ST_JOB_CANCEL;
-
 		wait_sysflags(p_info, set_flags, reset_flags, 0, WAIT_SYS_OR);
+
+		/* wait for a print job or cancel job command */
+		set_flags = 0;
+		reset_flags = ST_JOB_CANCEL | ST_JOB_RECV;
+		wait_sysflags(p_info, set_flags, reset_flags, 0, WAIT_SYS_OR);
+
+		if (is_sysflags(p_info, ST_JOB_RECV)) {
+			epson_print_file(p_info);
+			set_sysflags(p_info, ST_JOB_PRINTING);
+			reset_sysflags(p_info, ST_JOB_RECV);
+		}
+
+		if (is_sysflags(p_info, ST_JOB_CANCEL)) {
+			cancel_prt_job(p_info->printer_handle);
+			set_sysflags(p_info, ST_JOB_PRINTING);
+			reset_sysflags(p_info, ST_JOB_CANCEL);
+		}
 
 		if (is_sysflags(p_info, ST_PRT_CONNECT))
 		{

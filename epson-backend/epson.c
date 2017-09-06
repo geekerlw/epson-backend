@@ -206,6 +206,7 @@ static void init_cbtd(P_CBTD_INFO p_info)
 {
 	memset(p_info, 0, sizeof(CBTD_INFO));
 	p_info->status = (ECB_STATUS *)malloc(sizeof(ECB_STATUS));
+	p_info->file_path = NULL;
 
 	p_info->comsock_port = DAEMON_PORT;
 

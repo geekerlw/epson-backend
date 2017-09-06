@@ -34,6 +34,7 @@
 
 #define PRT_STATUS_MAX 256	/* maximum size of printer status strings */
 #define CONF_BUF_MAX 100	/* maximum size of configuration strings */
+#define PRT_FILE_MAX 20 /* maximum size fo print file require */
 
 #define EPS_MNT_NOZZLE     0
 #define EPS_MNT_CLEANING   1
@@ -43,6 +44,7 @@ typedef struct _CBTD_INFO
 {
 	char printer_name[CONF_BUF_MAX]; /* the printer title that is set with lpr */
 	char devprt_path[CONF_BUF_MAX]; /* open device path */
+	char* file_path; /* the file path to print */
 	unsigned int comsock_port; /* INET socket port */
 	int devfd;		/* device file descriptor */
 	int need_update;  /* printer status need update */

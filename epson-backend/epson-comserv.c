@@ -196,6 +196,22 @@ static int error_recept(int fd, int err_code)
 	return 0;
 }
 
+/* received a print file command */
+static int prt_file_recept(P_CBTD_INFO p_info, char *cbuf, int csize, int fd) {
+	const char prt_file_command[] = { 'p', 'r', 't', 'f', 'i', 'l', 'e' };
+	char file[COM_BUF_SIZE];
+	int header_size = sizeof(prt_file_command);
+
+	for(int i = 0; i < csize - header_size; i++) {
+		file[i] = cbuf[i + sizeof(header_size)];
+	}
+
+	p_info->file_path = (char *)malloc(sizeof(char));
+	p_info->file_path = file;
+	set_sysflags(p_info, ST_JOB_RECV);
+	
+}
+
 /* received a printer status get command */
 static int prt_status_recept(P_CBTD_INFO p_info, int fd) {
 	if (p_info->prt_status_len == 0)
@@ -331,6 +347,7 @@ static int default_recept(P_CBTD_INFO p_info, int fd, char* cbuf, int csize)
 /* handle the data which received */
 static int comserv_work(P_CBTD_INFO p_info, int fd)
 {
+	const char prt_file_command[] = { 'p', 'r', 't', 'f', 'i', 'l', 'e' };
 	const char prt_status_command[] = { 'p', 'r', 't', 's', 't' };
 	const char job_status_command[] = { 'j', 'o', 'b', 's', 't' };
 	const char material_command[] = { 'm', 'a', 't', 'e', 'r', 'i', 'a', 'l' };
@@ -353,9 +370,15 @@ static int comserv_work(P_CBTD_INFO p_info, int fd)
 		return error_recept(fd, ERRPKT_UNKNOWN_PACKET);
 	}
 
+	/* acquire print a file */
+	if (memcmp(cbuf, prt_file_command, sizeof(prt_file_command)) == 0) {
+		printf("recv a print file command\n");
+		if (prt_file_recept(p_info, cbuf, csize, fd))
+			err = 1;
+	}
+
 	/* acquire printer status */
 	if (memcmp(cbuf, prt_status_command, sizeof(prt_status_command)) == 0) {
-		printf("recv a prt_status_command\n");
 		if (prt_status_recept(p_info, fd))
 			err = 1;
 	}
