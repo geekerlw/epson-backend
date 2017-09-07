@@ -236,22 +236,18 @@ int write_prt_command(P_CBTD_INFO p_info, char* com_buf,
 	usleep(100000);
 
 
-	if (com_size)
-	{
+	if (com_size) {
 
 		/* get size of reply */
 		read_from_prt(p_info, SID_CTRL, NULL, &read_size);
 
-		if (read_size)
-		{
-
+		if (read_size) {
 			/* receive reply */
 			char tmp_buf[REP_BUF_SIZE];
 
 			assert(read_possible_size >= read_size);
 			*rep_size = read_size;
-			do
-			{
+			do {
 				int tmp_size = read_size;
 
 				err = read_from_prt(p_info, SID_CTRL, tmp_buf, &read_size);
@@ -278,8 +274,7 @@ static void clear_replay_buffer(P_CBTD_INFO p_info)
 	int err = 0;
 
 	enter_critical(p_info->ecbt_accsess_critical);
-	for (;;)
-	{
+	for (;;) {
 		err = read_from_prt(p_info, SID_CTRL, NULL, &read_size);
 
 		if (err != 0 || read_size <= 0)
@@ -287,10 +282,8 @@ static void clear_replay_buffer(P_CBTD_INFO p_info)
 
 		assert(REP_BUF_SIZE >= read_size);
 
-		do
-		{
+		do {
 			int tmp_size = read_size;
-
 			err = read_from_prt(p_info, SID_CTRL, tmp_buf, &read_size);
 			read_size = tmp_size - read_size;
 		} while (err == 0 && read_size > 0);
@@ -610,8 +603,7 @@ int post_prt_status(P_CBTD_INFO p_info)
 
 
 		point = strstr(p_info->prt_status, "ST:");
-		if (point == NULL)
-		{		/* retry */
+		if (point == NULL) {		/* retry */
 			usleep(100000);
 			clear_replay_buffer(p_info);
 			return post_prt_status(p_info);
@@ -619,10 +611,8 @@ int post_prt_status(P_CBTD_INFO p_info)
 
 		/* cancel of a printer was completed */
 		if (is_sysflags(p_info, ST_JOB_CANCEL)
-			&& !is_sysflags(p_info, ST_JOB_PRINTING))
-		{
-			if (point[4] == '4')
-			{
+			&& !is_sysflags(p_info, ST_JOB_PRINTING)) {
+			if (point[4] == '4') {
 				reset_sysflags(p_info, ST_JOB_CANCEL);
 			}
 		}
@@ -745,8 +735,7 @@ void datatrans_thread(P_CBTD_INFO p_info)
 	pthread_cleanup_push(datatrans_cleanup, (void *)&cargs);
 
 
-	for (;;)
-	{
+	for (;;) {
 		/* Is daemon in the middle of process for end ? */
 		if (is_sysflags(p_info, ST_SYS_DOWN))
 			break;
@@ -781,8 +770,7 @@ void datatrans_thread(P_CBTD_INFO p_info)
 			reset_sysflags(p_info, ST_JOB_CANCEL);
 		}
 
-		if (is_sysflags(p_info, ST_PRT_CONNECT))
-		{
+		if (is_sysflags(p_info, ST_PRT_CONNECT)) {
 			datatrans_work(p_info);	
 		}
 		

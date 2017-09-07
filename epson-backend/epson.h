@@ -23,8 +23,8 @@
 * the GNU General Public License in all respects for all of the
 * code used other then `cbt'.
 */
-#ifndef __EPSON_DAEMON_H__
-#define __EPSON_DAEMON_H__
+#ifndef __EPSON_H__
+#define __EPSON_H__
 
 #include "epson-types.h"
 
@@ -43,7 +43,6 @@
 typedef struct _CBTD_INFO
 {
 	char* printer_name; /* the printer name */
-	char devprt_path[CONF_BUF_MAX]; /* open device path */
 	char* file_path; /* the file path to print */
 	unsigned int comsock_port; /* INET socket port */
 	int devfd;		/* device file descriptor */
@@ -119,4 +118,4 @@ EPS_ERR_CODE epsMakeMainteCmd(
 	EPS_UINT32*		buffersize
 );
 
-#endif /* __EPSON_DAEMON_H__ */
+#endif /* __EPSON_H__ */

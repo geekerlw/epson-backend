@@ -70,8 +70,7 @@ static int servsock_open(int port)
 	int opt = 1;
 	struct sockaddr_in addr;
 
-    if (WSAStartup(MAKEWORD(2,2),&wsa) != 0)
-    {
+    if (WSAStartup(MAKEWORD(2,2),&wsa) != 0) {
         printf("Failed. Error Code : %d",WSAGetLastError());
         return 1;
     }
@@ -100,12 +99,10 @@ static int sock_read(int fd, char* buf, int read_size)
 	for (i = 0; i < SOCK_ACCSESS_WAIT_MAX; i++)
 	{
 		size = recv(fd, buf, read_size, 0);
-		if (size == read_size)
-		{
+		if (size == read_size) {
 			return 0;
 		}
-		else if (size > 0)
-		{
+		else if (size > 0) {
 			read_size -= size;
 			buf += size;
 			usleep (1000);
@@ -128,15 +125,13 @@ static int sock_write(int fd, char* buf, int write_size)
 	for (i = 0; i < SOCK_ACCSESS_WAIT_MAX; i++)
 	{
 		size = send(fd, buf, write_size, 0);
-		if (size == write_size)
-		{
+		if (size == write_size) {
 			/* todo: windows has no fsync, maybe use fflush instead */
 			//fsync(fd);
 			//fflush(fd);
 			return 0;
 		}
-		else if (size > 0)
-		{
+		else if (size > 0) {
 			write_size -= size;
 			buf += size;
 			usleep (1000);
@@ -335,9 +330,7 @@ static int default_recept(P_CBTD_INFO p_info, int fd, char* cbuf, int csize)
 	int rsize;
 
 	rsize = REP_BUF_SIZE;
-	if (write_prt_command(p_info, cbuf, csize,
-		rbuf, &rsize))
-	{
+	if (write_prt_command(p_info, cbuf, csize, rbuf, &rsize)) {
 		return 1;
 	}
 
@@ -366,8 +359,7 @@ static int comserv_work(P_CBTD_INFO p_info, int fd)
 	if (!is_sysflags(p_info, ST_PRT_CONNECT))
 		return error_recept(fd, ERRPKT_PRINTER_NO_CONNECT);
 
-	if (command_recv(fd, cbuf, &csize))
-	{
+	if (command_recv(fd, cbuf, &csize)) {
 		/* received indistinct packet */
 		return error_recept(fd, ERRPKT_UNKNOWN_PACKET);
 	}
@@ -429,8 +421,7 @@ static int comserv_work(P_CBTD_INFO p_info, int fd)
 			err = 1;
 	}
 
-	if (err)
-	{
+	if (err) {
 		error_recept(fd, ERRPKT_PRINTER_NO_CONNECT);
 		return 1;
 	}
@@ -445,10 +436,8 @@ static void comserv_cleanup(void* data)
 	P_CARGS p_cargs = (P_CARGS)data;
 	int fd;
 
-	for (fd = 0; fd < *(p_cargs->p_max) + 1; fd++)
-	{
-		if (FD_ISSET(fd, p_cargs->p_fds))
-		{
+	for (fd = 0; fd < *(p_cargs->p_max) + 1; fd++) {
+		if (FD_ISSET(fd, p_cargs->p_fds)) {
 			shutdown(fd, 2);
 			FD_CLR(fd, p_cargs->p_fds);
 		}
@@ -484,8 +473,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 	pthread_cleanup_push (comserv_cleanup, (void *)&cargs);
 
 	server_fd = servsock_open (p_info->comsock_port);
-	if (server_fd < 0)
-	{
+	if (server_fd < 0) {
 		char sock_num[10];
 
 		sprintf (sock_num, "%d", p_info->comsock_port);
@@ -497,8 +485,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 	FD_SET (server_fd, &sock_fds);
 	maxval = server_fd;
 
-	for (;;)
-	{
+	for (;;) {
 		int fd;
 		int addr_len = sizeof(client_addr);
 		fd_set watch_fds = sock_fds;
@@ -506,8 +493,7 @@ void comserv_thread(P_CBTD_INFO p_info)
 		tv.tv_sec = 2;
 		tv.tv_usec = 0;
 
-		if (select (maxval + 1, &watch_fds, NULL, NULL, &tv) < 0)
-		{
+		if (select (maxval + 1, &watch_fds, NULL, NULL, &tv) < 0) {
 			perror ("cs select ()");
 			continue;
 		}
@@ -516,12 +502,9 @@ void comserv_thread(P_CBTD_INFO p_info)
 		if (is_sysflags (p_info, ST_SYS_DOWN))
 			break;
 
-		for (fd = 0; fd < maxval + 1; fd++)
-		{
-			if ( FD_ISSET(fd, &watch_fds))
-			{
-				if (fd == server_fd)
-				{
+		for (fd = 0; fd < maxval + 1; fd++) {
+			if ( FD_ISSET(fd, &watch_fds)) {
+				if (fd == server_fd) {
 					/* connecting */
 					client_fd = accept (server_fd,
 							    (struct sockaddr *)&client_addr,
@@ -539,16 +522,13 @@ void comserv_thread(P_CBTD_INFO p_info)
 					set_sysflags (p_info, ST_CLIENT_CONNECT);
 					if (!is_sysflags (p_info, ST_PRT_CONNECT))
 						Sleep (1000);
-				}
-
-				else
-				{
+				} 
+				else {
 					int nread;
 					/* windows has no ioctl in user space, ioctlsocket instead */
 					//ioctl (fd, FIONREAD, &nread);
 					ioctlsocket(fd, FIONREAD, &nread);
-					if (nread == 0)
-					{
+					if (nread == 0) {
 						/* disconnecting */
 						printf("deconnect client fd = %d\n", fd);
 						shutdown (fd, 2);

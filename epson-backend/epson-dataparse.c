@@ -329,8 +329,7 @@ static ECB_PRINTER_STS ReadStatuslogfile(P_CBTD_INFO p_info, InkList *list, ECB_
 
 
 		int ink_no = 0;
-		while (node)
-		{
+		while (node) {
 			strncpy(ink, lpInk, 2);
 			node->rest = (int)strtol(ink, &stopstring, 16);
 
@@ -558,8 +557,7 @@ ECB_PRINTER_STS parse_prt_status(P_CBTD_INFO p_info)
 			p_info->status->inkstatus[i] = ECB_INK_ST_NOTAVAIL;
 			break;
 		default:
-			if (p_info->status->inklevel[i] > 100 || p_info->status->inklevel[i] < 0)
-			{
+			if (p_info->status->inklevel[i] > 100 || p_info->status->inklevel[i] < 0) {
 				p_info->status->inkstatus[i] = ECB_INK_ST_FAIL;
 			}
 			else {

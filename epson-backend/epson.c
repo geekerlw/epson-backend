@@ -63,8 +63,6 @@
 
 #pragma comment(lib,"setupapi.lib")
 
-//int pid_fd = -1;
-
 /* linux usleep simple support on windows */
 void usleep(__int64 usec) 
 { 
@@ -106,8 +104,7 @@ bool OpenDevice(LPGUID pGuid, char *outNameBuf, DWORD index)
 	hardwareDeviceInfo = SetupDiGetClassDevs(pGuid, NULL, NULL, (DIGCF_PRESENT | DIGCF_INTERFACEDEVICE));
 	deviceInfoData.cbSize = sizeof(SP_INTERFACE_DEVICE_DATA);
 
-	if (!SetupDiEnumDeviceInterfaces(hardwareDeviceInfo, 0, pGuid, index, &deviceInfoData))
-	{
+	if (!SetupDiEnumDeviceInterfaces(hardwareDeviceInfo, 0, pGuid, index, &deviceInfoData)) {
 		DWORD   reErr = GetLastError();
 		printf("reErr code  is %d\n", reErr);
 		return false;
@@ -128,8 +125,7 @@ bool OpenDevice(LPGUID pGuid, char *outNameBuf, DWORD index)
 
 	//   Retrieve   the   information   from   Plug   and   Play. 
 	if (!SetupDiGetInterfaceDeviceDetail(hardwareDeviceInfo, &deviceInfoData, functionClassDeviceData, predictedLength,
-		&requiredLength, NULL))
-	{
+		&requiredLength, NULL)) {
 		free(functionClassDeviceData);
 		return   false;
 	}
@@ -154,10 +150,7 @@ static int prt_connect(P_CBTD_INFO p_info)
 {
 	int *PrinterKey = &p_info->devfd;
 	char devname[100] = "";
-	//GUID keyid = { 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 };
 	GUID keyid = { 0x28d78fad, 0x5a12, 0x11d1, 0xae, 0x5b, 0x00, 0x00, 0xf8, 0x03, 0xa8, 0xc2 };
-	//GUID keyid = { 0x4d36e979, 0xe325, 0x11ce, 0xbf, 0xc1, 0x80, 0x00, 0x2b, 0xe1, 0x03, 0x18 };
-	//GUID keyid = { 0x1ed2bbf9, 0x11f0, 0x4084, 0xb2, 0x1f, 0xad, 0x83, 0xa8, 0xe6, 0xdc, 0xdc };
 	OVERLAPPED m_ov;
 	m_ov.Offset = 0;
 	m_ov.OffsetHigh = 0;
@@ -191,7 +184,7 @@ static int init_epson_cbt(P_CBTD_INFO p_info)
 }
 
 /* end of CBT */
-int end_epson_cbt(P_CBTD_INFO p_info)
+static int end_epson_cbt(P_CBTD_INFO p_info)
 {
 	int err = 0;
 
@@ -209,9 +202,8 @@ static void init_cbtd(P_CBTD_INFO p_info)
 	p_info->printer_name = (char *)malloc(sizeof(char));
 	p_info->file_path = NULL;
 
-	p_info->comsock_port = DAEMON_PORT;
-
 	p_info->devfd = -1;
+	p_info->comsock_port = DAEMON_PORT;
 	p_info->need_update = 1;
 
 	p_info->sysflags = 0;
@@ -266,6 +258,9 @@ void end_cbtd(P_CBTD_INFO p_info)
 	if (p_info->ecbt_accsess_critical)
 		delete_critical(p_info->ecbt_accsess_critical);
 
+	if (p_info->printer_name)
+		free(p_info->printer_name);
+
 	if (p_info->status)
 		free(p_info->status);
 
@@ -281,13 +276,11 @@ static void cbtd_control(void)
 	char printer[] = "EPSON R330 Series";
 	init_cbtd(&info);
 	info.printer_name = printer;
-	//sig_set();
 
-	while (!is_sysflags(&info, ST_SYS_DOWN))
-	{
+	while (!is_sysflags(&info, ST_SYS_DOWN)) {
 		/* turn into the main loop */
-		for (;;)
-		{
+		for (;;) {
+
 			set_flags = 0;
 			reset_flags = ST_SYS_DOWN | ST_CLIENT_CONNECT | ST_JOB_CANCEL;
 			if (wait_sysflags(&info, set_flags, reset_flags, 5, WAIT_SYS_OR) == 0)
@@ -303,23 +296,19 @@ static void cbtd_control(void)
 			continue;
 
 		/* initialize communication */
-		if (init_epson_cbt(&info) == 0)
-		{
-			/* run post_prt_status before threads start */
-			if(post_prt_status(&info) == 0){
-				/* thread starting */
-				set_sysflags(&info, ST_PRT_CONNECT);
-			}
+		if (init_epson_cbt(&info) == 0) {
 
+			/* thread starting */
 			set_sysflags(&info, ST_PRT_CONNECT);
-
+			
 			/* check status */
-			for (;;)
-			{
+			for (;;) {
+
 				set_flags = ST_CLIENT_CONNECT | ST_JOB_CANCEL;
 				reset_flags = 0;
 				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_AND) == 0)
 					break;
+
 				set_flags = ST_PRT_CONNECT;
 				reset_flags = ST_SYS_DOWN;
 				if (wait_sysflags(&info, set_flags, reset_flags, 2, WAIT_SYS_OR) == 0)
@@ -328,13 +317,10 @@ static void cbtd_control(void)
 		}
 		end_epson_cbt(&info);
 
-		if (info.devfd >= 0)
-		{
-			/* fixme: devfd maybe a HANDLE, so I use CloseHandle instead */
-			//close(info.devfd);
+		if (info.devfd >= 0) {
 			CloseHandle((HANDLE)info.devfd);
-			printf("deconnect printer\n");
 			info.devfd = -1;
+			printf("deconnect printer\n");
 
 			if (!is_sysflags(&info, ST_SYS_DOWN))
 				Sleep(2000);
