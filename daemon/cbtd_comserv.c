@@ -197,7 +197,7 @@ comserv_thread (P_CBTD_INFO p_info)
 
 				else
 				{
-					int nread;
+					int nread = 0;
 		  
 					ioctl (fd, FIONREAD, &nread);
 					if (nread == 0)
@@ -206,6 +206,7 @@ comserv_thread (P_CBTD_INFO p_info)
 						_DEBUG_MESSAGE_VAL("deconnect client fd = ", fd);
 						shutdown (fd, 2);
 						FD_CLR (fd, &sock_fds);
+						close(fd);
 
 						nclient--;
 						if (nclient == 0)
@@ -770,6 +771,7 @@ comserv_cleanup (void* data)
 		{
 			shutdown (fd, 2);
 			FD_CLR (fd, p_cargs->p_fds);
+			close(fd);
 		}
 	}
 
